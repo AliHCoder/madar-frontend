@@ -17,6 +17,8 @@
   font-display: swap;
 }
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -37,4 +39,21 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+}
+
+:root {
+  --sidebar-width: 280px;
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f9fafb;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-border: #e5e7eb;
+}
+
+.dark {
+  --color-bg-primary: #111827;
+  --color-bg-secondary: #1f2937;
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #9ca3af;
+  --color-border: #374151;
 }

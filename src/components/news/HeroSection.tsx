@@ -1,192 +1,287 @@
+// components/news/HeroSection.tsx
 "use client";
 import { useEffect, useRef } from "react";
-import Image from "next/image";
+import { MyImage } from "@/components/ui/MyImage";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { Article } from "@/types/news";
-import { Clock, User, Tag } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 
-export default function HeroSection({ article }: { article: Article }) {
+interface HeroSectionProps {
+  topBanners: Article[];
+  sideCards: Article[];
+  sliderArticles: Article[];
+}
+
+export default function HeroSection({
+  topBanners,
+  sideCards,
+  sliderArticles,
+}: HeroSectionProps) {
   const heroRef = useRef<HTMLDivElement>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
+  // اسلایدر خودکار
+  useEffect(() => {
+    if (sliderArticles.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % sliderArticles.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [sliderArticles.length]);
+
+  // انیمیشن ورود
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.fromTo(
-        ".hero-badge",
+        ".top-banner",
+        { opacity: 0, y: -20 },
+        { opacity: 1, y: 0, duration: 0.6, stagger: 0.15, ease: "power3.out" },
+      );
+      gsap.fromTo(
+        ".side-card",
         { opacity: 0, x: -30 },
-        { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.6,
+          delay: 0.3,
+          stagger: 0.15,
+          ease: "power3.out",
+        },
       );
       gsap.fromTo(
-        ".hero-title",
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 0.8, delay: 0.2, ease: "power3.out" },
-      );
-      gsap.fromTo(
-        ".hero-excerpt",
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.7, delay: 0.4, ease: "power3.out" },
-      );
-      gsap.fromTo(
-        ".hero-meta",
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.6, delay: 0.6 },
+        ".main-slider",
+        { opacity: 0, scale: 0.97 },
+        { opacity: 1, scale: 1, duration: 0.8, delay: 0.4, ease: "power3.out" },
       );
     }, heroRef);
-
     return () => ctx.revert();
-  }, [article]);
+  }, []);
+
+  const prevSlide = () =>
+    setCurrentSlide(
+      (prev) => (prev - 1 + sliderArticles.length) % sliderArticles.length,
+    );
+  const nextSlide = () =>
+    setCurrentSlide((prev) => (prev + 1) % sliderArticles.length);
+
+  const active = sliderArticles[currentSlide];
+
+  if (sliderArticles.length === 0) return null;
 
   return (
-    <div
-      ref={heroRef}
-      className="relative w-full h-[70vh] min-h-[520px] rounded-3xl overflow-hidden group"
-      style={{
-        boxShadow:
-          "0 25px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(220,38,38,0.1)",
-      }}
-    >
-      {/* تصویر */}
-      <Image
-        src={"/assets/images/png/test.jpg"}
-        alt={article.title}
-        fill
-        className="object-cover transition-transform duration-700 group-hover:scale-105"
-        priority
-      />
+    <div ref={heroRef} className="w-full flex flex-col gap-3" dir="ltr">
+      {/* ===== موبایل: نمایش ۲ بنر پایین ===== */}
+      <div className="grid grid-cols-1 gap-3 md:hidden">
+        {topBanners.slice(0, 2).map((banner) => (
+          <Link
+            key={banner.id}
+            href={`/article/${banner.id}`}
+            className="relative h-[100px] rounded-xl overflow-hidden group block"
+          >
+            <MyImage
+              src={banner.image || "/assets/images/png/test.jpg"}
+              alt={banner.title}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
 
-      {/* لایه گرادیان اصلی */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            <div className="absolute inset-0 flex justify-end items-center px-4">
+              <h3 className="text-white font-black text-sm text-right leading-snug line-clamp-2">
+                {banner.title}
+              </h3>
+            </div>
 
-      {/* لایه گرادیان قرمز ظریف */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to top, rgba(153,27,27,0.35) 0%, transparent 60%)",
-        }}
-      />
+            <div
+              className="absolute bottom-0 left-0 right-0 h-0.5"
+              style={{
+                background: "linear-gradient(90deg, #FF5722, transparent)",
+              }}
+            />
+          </Link>
+        ))}
+      </div>
 
-      {/* خط قرمز پایین */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-1"
-        style={{
-          background:
-            "linear-gradient(90deg, transparent, #dc2626, rgba(255,255,255,0.4), #dc2626, transparent)",
-        }}
-      />
+      {/* ===== ردیف بالا: دو بنر - مخفی در موبایل ===== */}
+      <div className="hidden md:grid grid-cols-2 gap-3">
+        {topBanners.slice(0, 2).map((banner, i) => (
+          <Link
+            key={banner.id}
+            href={`/article/${banner.id}`}
+            className="top-banner relative h-[100px] lg:h-[120px] rounded-xl overflow-hidden group block"
+          >
+            <MyImage
+              src={banner.image || "/assets/images/png/test.jpg"}
+              alt={banner.title}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            {/* گرادیان تیره */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
 
-      {/* محتوا */}
-      <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
-        {/* badge دسته‌بندی */}
-        <div className="hero-badge flex items-center gap-2 mb-4 w-fit">
+            {/* محتوا */}
+            <div className="absolute inset-0 flex justify-end items-center px-4 lg:px-5 gap-3">
+              <h3 className="text-white font-black text-sm lg:text-lg xl:text-xl text-right leading-snug line-clamp-2">
+                {banner.title}
+              </h3>
+            </div>
+
+            {/* خط نارنجی پایین */}
+            <div
+              className="absolute bottom-0 left-0 right-0 h-0.5"
+              style={{
+                background: "linear-gradient(90deg, #FF5722, transparent)",
+              }}
+            />
+          </Link>
+        ))}
+      </div>
+
+      {/* ===== ردیف پایین: ستون چپ + اسلایدر ===== */}
+      <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] gap-3 h-[400px] sm:h-[450px] md:h-[520px]">
+        {/* --- ستون چپ: دو کارت زیر هم - مخفی در موبایل --- */}
+        <div className="hidden md:flex flex-col gap-3 text-right h-full">
+          {sideCards.slice(0, 2).map((card) => (
+            <Link
+              key={card.id}
+              href={`/article/${card.id}`}
+              className="side-card relative flex-1 rounded-xl overflow-hidden group block"
+            >
+              <MyImage
+                src={card.image || "/assets/images/png/test.jpg"}
+                alt={card.title}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+
+              {/* محتوا پایین */}
+              <div className="absolute bottom-0 left-0 right-0 p-3 lg:p-4">
+                <h3 className="text-white font-black text-xs lg:text-sm leading-snug line-clamp-2">
+                  {card.title}
+                </h3>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* --- اسلایدر بزرگ - تمام عرض در موبایل --- */}
+        <div className="main-slider relative rounded-xl overflow-hidden group h-full">
+          {/* تصویر اسلاید فعال */}
+          <MyImage
+            src={active.image || "/assets/images/png/test.jpg"}
+            alt={active.title}
+            fill
+            className="object-cover transition-all duration-700"
+            priority
+          />
+
+          {/* گرادیان */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
           <div
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+            className="absolute inset-0"
             style={{
-              background: "rgba(220,38,38,0.85)",
+              background:
+                "linear-gradient(to top, rgba(153,27,27,0.3) 0%, transparent 55%)",
+            }}
+          />
+
+          {/* دکمه‌های ناوبری */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
+            style={{
+              background: "rgba(0,0,0,0.5)",
               border: "1px solid rgba(255,255,255,0.2)",
               backdropFilter: "blur(8px)",
-              boxShadow: "0 0 16px rgba(220,38,38,0.5)",
             }}
           >
-            <Tag size={11} className="text-white" />
-            <span className="text-white text-xs font-bold tracking-wide">
-              {article.category}
-            </span>
-          </div>
-
-          {/* نشانگر زنده */}
-          <div
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+            <ChevronLeft size={16} className="sm:w-5 sm:h-5 text-white" />
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
             style={{
-              background: "rgba(0,0,0,0.45)",
-              border: "1px solid rgba(255,255,255,0.15)",
+              background: "rgba(0,0,0,0.5)",
+              border: "1px solid rgba(255,255,255,0.2)",
               backdropFilter: "blur(8px)",
             }}
           >
-            <span
-              className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"
-              style={{ boxShadow: "0 0 6px rgba(220,38,38,0.9)" }}
-            />
-            <span className="text-white text-xs font-medium">ویژه</span>
-          </div>
-        </div>
+            <ChevronRight size={16} className="sm:w-5 sm:h-5 text-white" />
+          </button>
 
-        {/* عنوان */}
-        <Link href={`/article/${article.id}`}>
-          <h1
-            className="hero-title text-white text-3xl md:text-5xl font-extrabold leading-tight mb-4 max-w-3xl transition-colors duration-300 cursor-pointer"
-            style={{
-              textShadow: "0 2px 20px rgba(0,0,0,0.5)",
-            }}
-          >
-            <span className="hover:text-red-300 transition-colors duration-300">
-              {article.title}
-            </span>
-          </h1>
-        </Link>
-
-        {/* خلاصه */}
-        <p
-          className="hero-excerpt text-gray-300 text-base md:text-lg max-w-2xl mb-6 line-clamp-2 leading-relaxed"
-          style={{ textShadow: "0 1px 8px rgba(0,0,0,0.6)" }}
-        >
-          {article.excerpt}
-        </p>
-
-        {/* متا */}
-        <div
-          className="hero-meta flex flex-wrap items-center gap-3 md:gap-5"
-          style={{
-            borderTop: "1px solid rgba(255,255,255,0.12)",
-            paddingTop: "16px",
-          }}
-        >
-          {/* نویسنده */}
-          <div className="flex items-center gap-1.5">
-            <div
-              className="w-6 h-6 rounded-full flex items-center justify-center"
-              style={{ background: "rgba(220,38,38,0.6)" }}
-            >
-              <User size={11} className="text-white" />
-            </div>
-            <span className="text-gray-300 text-sm font-medium">
-              {article.author}
-            </span>
+          {/* نقاط اسلایدر */}
+          <div className="absolute top-3 sm:top-4 left-1/2 -translate-x-1/2 flex gap-1 sm:gap-1.5 z-10">
+            {sliderArticles.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentSlide(i)}
+                className="transition-all duration-300"
+                style={{
+                  width: i === currentSlide ? "20px" : "6px",
+                  height: "6px",
+                  borderRadius: "3px",
+                  background:
+                    i === currentSlide ? "#FF5722" : "rgba(255,255,255,0.4)",
+                }}
+              />
+            ))}
           </div>
 
-          {/* جداکننده */}
-          <span
-            className="w-px h-4"
-            style={{ background: "rgba(255,255,255,0.2)" }}
-          />
+          {/* محتوای اسلاید */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 lg:p-8">
+            {/* نام نویسنده بالای عنوان */}
+            <p className="text-gray-300 text-xs sm:text-sm mb-1 sm:mb-2 font-medium">
+              {active.author}
+            </p>
 
-          {/* تاریخ */}
-          <div className="flex items-center gap-1.5">
-            <Clock size={13} className="text-red-400" />
-            <span className="text-gray-400 text-sm">
-              {new Date(article.publishedAt).toLocaleDateString("fa-IR")}
-            </span>
+            <Link href={`/article/${active.id}`}>
+              <h2
+                className="text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl text-right font-black leading-tight mb-2 sm:mb-4 max-w-2xl hover:text-orange-300 transition-colors duration-300 cursor-pointer"
+                style={{ textShadow: "0 2px 16px rgba(0,0,0,0.5)" }}
+              >
+                {active.title}
+              </h2>
+            </Link>
           </div>
 
-          {/* جداکننده */}
-          <span
-            className="w-px h-4"
-            style={{ background: "rgba(255,255,255,0.2)" }}
-          />
-
-          {/* زمان مطالعه */}
+          {/* خط قرمز پایین */}
           <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs"
+            className="absolute bottom-0 left-0 right-0 h-1"
             style={{
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.12)",
+              background:
+                "linear-gradient(90deg, transparent, #dc2626, rgba(255,255,255,0.4), #dc2626, transparent)",
             }}
-          >
-            <span className="text-gray-300 font-medium">
-              {article.readTime} دقیقه مطالعه
-            </span>
-          </div>
+          />
         </div>
+      </div>
+
+      {/* ===== موبایل: نمایش ۲ کارت پایین اسلایدر ===== */}
+      <div className="grid grid-cols-2 gap-3 md:hidden">
+        {sideCards.slice(0, 2).map((card) => (
+          <Link
+            key={card.id}
+            href={`/article/${card.id}`}
+            className="relative h-[150px] rounded-xl overflow-hidden group block"
+          >
+            <MyImage
+              src={card.image || "/assets/images/png/test.jpg"}
+              alt={card.title}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+
+            <div className="absolute bottom-0 left-0 right-0 p-3">
+              <h3 className="text-white font-bold text-xs leading-snug line-clamp-2">
+                {card.title}
+              </h3>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   );

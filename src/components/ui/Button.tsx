@@ -1,3 +1,4 @@
+// components/ui/Button.tsx
 "use client";
 import { useRef, ReactNode } from "react";
 import { gsap } from "gsap";
@@ -16,12 +17,13 @@ interface ButtonProps {
 
 const variants = {
   primary:
-    "bg-gradient-to-l from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white shadow-lg shadow-red-500/30 hover:shadow-red-500/50",
+    "bg-gradient-to-l from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white shadow-lg shadow-red-500/30 hover:shadow-red-500/50 dark:shadow-red-500/20 dark:hover:shadow-red-500/40",
   outline:
-    "bg-white/80 backdrop-blur-sm border-2 border-red-500 text-red-600 hover:bg-red-600 hover:text-white shadow-sm hover:shadow-red-500/25",
-  ghost: "bg-transparent hover:bg-red-50 text-red-600 hover:text-red-700",
+    "bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-2 border-red-500 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 dark:hover:text-white shadow-sm hover:shadow-red-500/25",
+  ghost:
+    "bg-transparent hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300",
   danger:
-    "bg-gradient-to-l from-red-700 to-red-600 hover:from-red-800 hover:to-red-700 text-white shadow-lg shadow-red-700/30",
+    "bg-gradient-to-l from-red-700 to-red-600 hover:from-red-800 hover:to-red-700 text-white shadow-lg shadow-red-700/30 dark:shadow-red-700/20",
 };
 
 const sizes = {
@@ -69,7 +71,7 @@ export default function Button({
       onClick={handleClick}
       className={clsx(
         "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200",
-        "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
+        "focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         variants[variant],
         sizes[size],

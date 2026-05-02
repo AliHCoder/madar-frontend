@@ -1,3 +1,4 @@
+// components/news/NewsGrid.tsx
 import NewsCard from "./NewsCard";
 import { Article } from "@/types/news";
 

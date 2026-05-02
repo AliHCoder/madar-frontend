@@ -1,6 +1,6 @@
-// SidebarLatest.tsx
+// components/news/SidebarLatest.tsx
 import Link from "next/link";
-import Image from "next/image";
+import { MyImage } from "@/components/ui/MyImage";
 import { Article } from "@/types/news";
 import ScrollReveal from "../animations/ScrollReveal";
 import { Clock } from "lucide-react";
@@ -8,7 +8,7 @@ import { Clock } from "lucide-react";
 export default function SidebarLatest({ articles }: { articles: Article[] }) {
   return (
     <aside className="space-y-4">
-      <h3 className="text-base font-bold border-r-4 border-red-500 pr-3 text-gray-900">
+      <h3 className="text-base font-bold border-r-4 border-red-500 pr-3 text-gray-900 dark:text-white">
         پربازدیدترین
       </h3>
       <div className="space-y-1">
@@ -16,10 +16,11 @@ export default function SidebarLatest({ articles }: { articles: Article[] }) {
           <ScrollReveal key={article.id} delay={i * 0.08} direction="right">
             <Link
               href={`/article/${article.id}`}
-              className="flex gap-3 group p-3 rounded-xl transition-colors duration-200 hover:bg-red-50"
+              className="flex gap-3 group p-3 rounded-xl transition-colors duration-200 
+                hover:bg-red-50 dark:hover:bg-red-900/20"
             >
               <div className="relative w-20 h-16 shrink-0 rounded-lg overflow-hidden">
-                <Image
+                <MyImage
                   src={"/assets/images/png/test.jpg"}
                   alt={article.title}
                   fill
@@ -27,10 +28,13 @@ export default function SidebarLatest({ articles }: { articles: Article[] }) {
                 />
               </div>
               <div className="flex flex-col justify-between">
-                <p className="text-sm font-semibold text-gray-800 line-clamp-2 group-hover:text-red-600 transition-colors duration-200">
+                <p
+                  className="text-sm font-semibold text-gray-800 dark:text-gray-200 line-clamp-2 
+                  group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors duration-200"
+                >
                   {article.title}
                 </p>
-                <span className="flex items-center gap-1 text-xs text-gray-400">
+                <span className="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
                   <Clock size={11} className="text-red-400" />
                   {article.readTime} دقیقه
                 </span>

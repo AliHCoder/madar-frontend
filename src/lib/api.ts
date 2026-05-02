@@ -1,10 +1,14 @@
+// lib/api.ts
 import axios from "axios";
-import { Article, ApiResponse } from "@/types/news";
-import { mockArticles, getMockResponse } from "./mockData";
+import {
+  Article,
+  LiveStream,
+  ArchivedStream,
+  Category,
+  ApiResponse,
+} from "@/types/news";
 
-// ─── تشخیص خودکار: اگر API_URL تنظیم نشده، از Mock استفاده می‌کنیم ───
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const USE_MOCK = !API_URL || API_URL === "your-api-url-here";
 
 const api = axios.create({
   baseURL: API_URL || "http://localhost:3001/api",
@@ -12,65 +16,52 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// ─── Mock helpers ──────────────────────────────────────────────────────────────
-const mockDelay = (ms = 300) => new Promise((r) => setTimeout(r, ms));
+api.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("token");
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-const mockGetLatest = async (
-  page = 1,
-  limit = 10,
-): Promise<ApiResponse<Article[]>> => {
-  await mockDelay();
-  const start = (page - 1) * limit;
-  const sliced = mockArticles.slice(start, start + limit);
-  return getMockResponse(sliced, mockArticles.length);
+const getFullImageUrl = (url?: string) => {
+  if (!url) return url;
+  if (url.startsWith("http")) return url;
+  const base = API_URL || "http://localhost:3001";
+  return `${base}${url}`;
 };
 
-const mockGetById = async (id: string): Promise<Article> => {
-  await mockDelay();
-  const article = mockArticles.find((a) => a.id === id);
-  if (!article) throw new Error("Article not found");
-  return article;
-};
+const normalizeId = (item: any) => ({
+  ...item,
+  id: item._id || item.id,
+  image: getFullImageUrl(item.image),
+  thumbnail: getFullImageUrl(item.thumbnail),
+  videoUrl: getFullImageUrl(item.videoUrl),
+  streamUrl: getFullImageUrl(item.streamUrl),
+});
 
-const mockGetByCategory = async (
-  slug: string,
-  page = 1,
-  limit = 10,
-): Promise<ApiResponse<Article[]>> => {
-  await mockDelay();
-  const filtered = mockArticles.filter((a) => a.categorySlug === slug);
-  const start = (page - 1) * limit;
-  return getMockResponse(filtered.slice(start, start + limit), filtered.length);
-};
+const normalizeArray = (arr: any[]) => arr.map(normalizeId);
 
-const mockSearch = async (query: string): Promise<Article[]> => {
-  await mockDelay(200);
-  const q = query.toLowerCase();
-  return mockArticles.filter(
-    (a) =>
-      a.title.toLowerCase().includes(q) ||
-      a.excerpt.toLowerCase().includes(q) ||
-      a.tags?.some((t) => t.toLowerCase().includes(q)),
-  );
-};
-
-const mockGetBreaking = async (): Promise<Article[]> => {
-  await mockDelay(150);
-  return mockArticles.filter((a) => a.isBreaking);
-};
-
-// ─── API اصلی ─────────────────────────────────────────────────────────────────
+// ─── News API ──────────────────────────────────────────────
 export const newsApi = {
   getLatest: async (page = 1, limit = 10): Promise<ApiResponse<Article[]>> => {
-    if (USE_MOCK) return mockGetLatest(page, limit);
-    const { data } = await api.get(`/news?page=${page}&limit=${limit}`);
+    const { data } = await api.get(`/articles?page=${page}&limit=${limit}`);
+    if (data.data) data.data = normalizeArray(data.data);
     return data;
   },
 
+  getTrending: async (limit = 10): Promise<ApiResponse<Article[]>> => {
+    const { data } = await api.get(`/articles?limit=${limit}&sort=-views`);
+    if (data.data) data.data = normalizeArray(data.data);
+    return {
+      ...data,
+      data: data.data.sort((a: Article, b: Article) => b.views - a.views),
+    };
+  },
+
   getById: async (id: string): Promise<Article> => {
-    if (USE_MOCK) return mockGetById(id);
-    const { data } = await api.get(`/news/${id}`);
-    return data;
+    const { data } = await api.get(`/articles/${id}`);
+    return normalizeId(data);
   },
 
   getByCategory: async (
@@ -78,42 +69,220 @@ export const newsApi = {
     page = 1,
     limit = 10,
   ): Promise<ApiResponse<Article[]>> => {
-    if (USE_MOCK) return mockGetByCategory(slug, page, limit);
     const { data } = await api.get(
-      `/news/category/${slug}?page=${page}&limit=${limit}`,
+      `/articles?category=${slug}&page=${page}&limit=${limit}`,
     );
+    if (data.data) data.data = normalizeArray(data.data);
     return data;
   },
 
   search: async (query: string): Promise<Article[]> => {
-    if (USE_MOCK) return mockSearch(query);
     const { data } = await api.get(
-      `/news/search?q=${encodeURIComponent(query)}`,
+      `/articles?search=${encodeURIComponent(query)}`,
     );
-    return data;
+    return normalizeArray(data.data || []);
   },
 
   getBreaking: async (): Promise<Article[]> => {
-    if (USE_MOCK) return mockGetBreaking();
-    const { data } = await api.get("/news/breaking");
-    return data;
+    const { data } = await api.get("/articles/breaking");
+    const list = Array.isArray(data) ? data : data.data || [];
+    return normalizeArray(list);
   },
 
   getFeatured: async (): Promise<Article[]> => {
-    if (USE_MOCK) return mockArticles.slice(0, 5);
-    const { data } = await api.get("/news/featured");
-    return data;
+    const { data } = await api.get("/articles?limit=5&sort=-views");
+    return normalizeArray(data.data || []);
   },
 
   getRelated: async (id: string, categorySlug: string): Promise<Article[]> => {
-    if (USE_MOCK) {
-      await mockDelay(200);
-      return mockArticles
-        .filter((a) => a.categorySlug === categorySlug && a.id !== id)
-        .slice(0, 4);
-    }
-    const { data } = await api.get(`/news/${id}/related`);
+    const { data } = await api.get(
+      `/articles?category=${categorySlug}&limit=4`,
+    );
+    return normalizeArray(data.data || [])
+      .filter((a: Article) => a.id !== id)
+      .slice(0, 4);
+  },
+
+  create: async (formData: FormData): Promise<Article> => {
+    const { data } = await api.post("/articles", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return normalizeId(data);
+  },
+
+  update: async (id: string, formData: FormData): Promise<Article> => {
+    const { data } = await api.put(`/articles/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return normalizeId(data);
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/articles/${id}`);
+  },
+};
+
+// ─── Live API ──────────────────────────────────────────────
+export const liveApi = {
+  getActive: async (): Promise<LiveStream[]> => {
+    const { data } = await api.get("/live/active");
+    const list = Array.isArray(data) ? data : data.data || [];
+    return normalizeArray(list);
+  },
+
+  getAll: async (page = 1, limit = 10): Promise<ApiResponse<LiveStream[]>> => {
+    const { data } = await api.get(`/live?page=${page}&limit=${limit}`);
+    if (data.data) data.data = normalizeArray(data.data);
     return data;
+  },
+
+  getById: async (id: string): Promise<LiveStream> => {
+    const { data } = await api.get(`/live/${id}`);
+    return normalizeId(data);
+  },
+
+  getByCategory: async (
+    slug: string,
+    page = 1,
+    limit = 10,
+  ): Promise<ApiResponse<LiveStream[]>> => {
+    const { data } = await api.get(
+      `/live?category=${slug}&page=${page}&limit=${limit}`,
+    );
+    if (data.data) data.data = normalizeArray(data.data);
+    return data;
+  },
+
+  getUpcoming: async (): Promise<LiveStream[]> => {
+    const { data } = await api.get("/live?status=upcoming");
+    return normalizeArray(data.data || []);
+  },
+
+  create: async (formData: FormData): Promise<LiveStream> => {
+    const { data } = await api.post("/live", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return normalizeId(data);
+  },
+
+  update: async (id: string, formData: FormData): Promise<LiveStream> => {
+    const { data } = await api.put(`/live/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return normalizeId(data);
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/live/${id}`);
+  },
+};
+
+// ─── Archive API ───────────────────────────────────────────
+export const archiveApi = {
+  getAll: async (
+    page = 1,
+    limit = 10,
+  ): Promise<ApiResponse<ArchivedStream[]>> => {
+    const { data } = await api.get(`/archive?page=${page}&limit=${limit}`);
+    if (data.data) data.data = normalizeArray(data.data);
+    return data;
+  },
+
+  getById: async (id: string): Promise<ArchivedStream> => {
+    const { data } = await api.get(`/archive/${id}`);
+    return normalizeId(data);
+  },
+
+  getByCategory: async (
+    slug: string,
+    page = 1,
+    limit = 10,
+  ): Promise<ApiResponse<ArchivedStream[]>> => {
+    const { data } = await api.get(
+      `/archive?category=${slug}&page=${page}&limit=${limit}`,
+    );
+    if (data.data) data.data = normalizeArray(data.data);
+    return data;
+  },
+
+  getRecent: async (limit = 6): Promise<ArchivedStream[]> => {
+    const { data } = await api.get(`/archive?limit=${limit}&sort=-recordedAt`);
+    return normalizeArray(data.data || []);
+  },
+
+  getPopular: async (limit = 6): Promise<ArchivedStream[]> => {
+    const { data } = await api.get(`/archive?limit=${limit}&sort=-views`);
+    return normalizeArray(data.data || []);
+  },
+
+  create: async (formData: FormData): Promise<ArchivedStream> => {
+    const { data } = await api.post("/archive", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return normalizeId(data);
+  },
+
+  update: async (id: string, formData: FormData): Promise<ArchivedStream> => {
+    const { data } = await api.put(`/archive/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return normalizeId(data);
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/archive/${id}`);
+  },
+};
+
+// ─── Categories API ────────────────────────────────────────
+export const categoryApi = {
+  getAll: async (): Promise<Category[]> => {
+    const { data } = await api.get("/categories");
+    const list = Array.isArray(data) ? data : data.data || [];
+    return normalizeArray(list);
+  },
+
+  getBySlug: async (slug: string): Promise<Category> => {
+    const { data } = await api.get(`/categories/${slug}`);
+    return normalizeId(data);
+  },
+};
+
+// ─── Auth API ──────────────────────────────────────────────
+export const authApi = {
+  login: async (email: string, password: string) => {
+    const { data } = await api.post("/auth/login", { email, password });
+    if (typeof window !== "undefined") {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+    }
+    return data;
+  },
+
+  register: async (username: string, email: string, password: string) => {
+    const { data } = await api.post("/auth/register", {
+      username,
+      email,
+      password,
+    });
+    return data;
+  },
+
+  getMe: async () => {
+    const { data } = await api.get("/auth/me");
+    return data.user;
+  },
+
+  logout: () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
+  },
+
+  isAuthenticated: () => {
+    if (typeof window !== "undefined") return !!localStorage.getItem("token");
+    return false;
   },
 };
 

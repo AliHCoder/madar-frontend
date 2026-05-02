@@ -1,4 +1,4 @@
-// Skeleton.tsx
+// components/ui/Skeleton.tsx
 import { clsx } from "clsx";
 
 interface SkeletonProps {
@@ -17,7 +17,7 @@ export function Skeleton({ className, rounded = "md" }: SkeletonProps) {
   return (
     <div
       className={clsx(
-        "animate-pulse bg-gray-100",
+        "animate-pulse bg-gray-200 dark:bg-gray-700",
         roundedMap[rounded],
         className,
       )}
@@ -28,11 +28,9 @@ export function Skeleton({ className, rounded = "md" }: SkeletonProps) {
 export function NewsCardSkeleton() {
   return (
     <div
-      className="bg-white rounded-2xl overflow-hidden"
-      style={{
-        border: "1px solid rgba(0,0,0,0.06)",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-      }}
+      className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden
+        border border-black/[0.06] dark:border-white/[0.08]"
+      style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
     >
       <Skeleton className="h-52 w-full" rounded="sm" />
       <div className="p-5 space-y-3">
@@ -50,7 +48,7 @@ export function NewsCardSkeleton() {
 
 export function HeroSkeleton() {
   return (
-    <div className="relative w-full h-[70vh] min-h-[500px] rounded-3xl overflow-hidden bg-gray-100">
+    <div className="relative w-full h-[70vh] min-h-[500px] rounded-3xl overflow-hidden bg-gray-200 dark:bg-gray-800">
       <Skeleton className="absolute inset-0 h-full w-full" rounded="sm" />
       <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 space-y-4">
         <Skeleton className="h-5 w-24" rounded="full" />

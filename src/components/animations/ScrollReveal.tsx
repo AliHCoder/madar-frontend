@@ -16,7 +16,7 @@ export default function ScrollReveal({
   children,
   delay = 0,
   direction = "up",
-  className,
+  className = "",
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -26,15 +26,15 @@ export default function ScrollReveal({
 
     const from: gsap.TweenVars = { opacity: 0 };
     if (direction === "up") from.y = 50;
-    if (direction === "left") from.x = -50;
-    if (direction === "right") from.x = 50;
+    else if (direction === "left") from.x = -50;
+    else if (direction === "right") from.x = 50;
 
     const ctx = gsap.context(() => {
       gsap.fromTo(el, from, {
         opacity: 1,
         x: 0,
         y: 0,
-        duration: 0.9,
+        duration: 0.8,
         delay,
         ease: "power3.out",
         scrollTrigger: {
