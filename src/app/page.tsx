@@ -1,30 +1,127 @@
 // app/page.tsx
+"use client";
+
 import HeroSection from "@/components/news/HeroSection";
 import NewsGrid from "@/components/news/NewsGrid";
 import { newsApi, liveApi, archiveApi } from "@/lib/api";
 import { TrendingUp, Clock, Radio, Archive } from "lucide-react";
 import LiveCard from "@/components/live/LiveCard";
 import ArchiveCard from "@/components/archive/ArchiveCard";
+import { useState, useEffect } from "react";
+import type { Article, LiveStream, ArchivedStream } from "@/types/news";
 
-export default async function HomePage() {
-  const [latest, breaking, liveStreams, archivedVideos] = await Promise.all([
-    newsApi.getLatest(),
-    newsApi.getBreaking(),
-    liveApi.getActive().catch(() => []),
-    archiveApi.getRecent(3).catch(() => []),
-  ]);
+export default function HomePage() {
+  const [data, setData] = useState<{
+    latest: any;
+    breaking: any;
+    liveStreams: LiveStream[];
+    archivedVideos: ArchivedStream[];
+  }>({
+    latest: null,
+    breaking: null,
+    liveStreams: [],
+    archivedVideos: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const allArticles = latest.data || [];
-  const [hero, ...rest] = allArticles;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  // مطمئن شو آرایه هستن
-  const safeLiveStreams = Array.isArray(liveStreams) ? liveStreams : [];
-  const safeArchivedVideos = Array.isArray(archivedVideos)
-    ? archivedVideos
+        // ★ فچ موازی با fallback
+        const [latest, breaking, liveStreams, archivedVideos] =
+          await Promise.allSettled([
+            newsApi.getLatest(1, 20),
+            newsApi.getBreaking(),
+            liveApi.getActive(),
+            archiveApi.getRecent(3),
+          ]);
+
+        setData({
+          latest:
+            latest.status === "fulfilled" ? latest.value : { data: [], total: 0 },
+          breaking: breaking.status === "fulfilled" ? breaking.value : [],
+          liveStreams:
+            liveStreams.status === "fulfilled" ? liveStreams.value : [],
+          archivedVideos:
+            archivedVideos.status === "fulfilled" ? archivedVideos.value : [],
+        });
+      } catch (err: any) {
+        console.error("Error fetching data:", err);
+        setError(err?.message || "خطا در بارگذاری داده‌ها");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative w-20 h-20 mx-auto mb-6">
+            <div className="absolute inset-0 border-4 border-red-200 dark:border-red-900 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-transparent border-t-red-500 rounded-full animate-spin"></div>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 text-lg font-medium">
+            در حال بارگذاری...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl max-w-md">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-2xl">⚠️</span>
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            خطا در بارگذاری
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+          >
+            بارگذاری مجدد
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const allArticles = data.latest?.data || [];
+  const safeLiveStreams = Array.isArray(data.liveStreams)
+    ? data.liveStreams
+    : [];
+  const safeArchivedVideos = Array.isArray(data.archivedVideos)
+    ? data.archivedVideos
     : [];
 
+  // ★ اگر هیچ داده‌ای نیست
+  if (allArticles.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600 dark:text-gray-300">
+          داده‌ای برای نمایش وجود ندارد
+        </p>
+      </div>
+    );
+  }
+
+  const [hero, ...rest] = allArticles;
   const liveCount = safeLiveStreams.filter(
-    (s) => s?.isLive || s?.status === "live",
+    (s) => s?.isLive || s?.status === "live"
   ).length;
 
   return (
@@ -93,11 +190,11 @@ export default async function HomePage() {
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {safeLiveStreams
-                .slice(0, 3)
-                .map((stream) =>
-                  stream ? <LiveCard key={stream.id} stream={stream} /> : null,
-                )}
+              {safeLiveStreams.slice(0, 3).map((stream) =>
+                stream ? (
+                  <LiveCard key={stream.id} stream={stream} />
+                ) : null
+              )}
             </div>
           </section>
         )}
@@ -173,13 +270,11 @@ export default async function HomePage() {
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {safeArchivedVideos
-                .slice(0, 3)
-                .map((stream) =>
-                  stream ? (
-                    <ArchiveCard key={stream.id} stream={stream} />
-                  ) : null,
-                )}
+              {safeArchivedVideos.slice(0, 3).map((stream) =>
+                stream ? (
+                  <ArchiveCard key={stream.id} stream={stream} />
+                ) : null
+              )}
             </div>
           </section>
         )}

@@ -22,7 +22,9 @@ export default async function ArticlePage(props: {
       newsApi.getLatest(1, 6),
     ]);
     article = articleData;
-    related = (relatedData.data || []).filter((a) => a.id !== id).slice(0, 5);
+    related = (relatedData.data || [])
+      .filter((a) => a && a.id !== id)
+      .slice(0, 5);
   } catch {
     notFound();
   }
