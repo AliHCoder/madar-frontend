@@ -42,7 +42,9 @@ export default function HomePage() {
 
         setData({
           latest:
-            latest.status === "fulfilled" ? latest.value : { data: [], total: 0 },
+            latest.status === "fulfilled"
+              ? latest.value
+              : { data: [], total: 0 },
           breaking: breaking.status === "fulfilled" ? breaking.value : [],
           liveStreams:
             liveStreams.status === "fulfilled" ? liveStreams.value : [],
@@ -121,7 +123,7 @@ export default function HomePage() {
 
   const [hero, ...rest] = allArticles;
   const liveCount = safeLiveStreams.filter(
-    (s) => s?.isLive || s?.status === "live"
+    (s) => s?.isLive || s?.status === "live",
   ).length;
 
   return (
@@ -190,11 +192,11 @@ export default function HomePage() {
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {safeLiveStreams.slice(0, 3).map((stream) =>
-                stream ? (
-                  <LiveCard key={stream.id} stream={stream} />
-                ) : null
-              )}
+              {safeLiveStreams
+                .slice(0, 3)
+                .map((stream) =>
+                  stream ? <LiveCard key={stream.id} stream={stream} /> : null,
+                )}
             </div>
           </section>
         )}
@@ -270,11 +272,13 @@ export default function HomePage() {
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {safeArchivedVideos.slice(0, 3).map((stream) =>
-                stream ? (
-                  <ArchiveCard key={stream.id} stream={stream} />
-                ) : null
-              )}
+              {safeArchivedVideos
+                .slice(0, 3)
+                .map((stream) =>
+                  stream ? (
+                    <ArchiveCard key={stream.id} stream={stream} />
+                  ) : null,
+                )}
             </div>
           </section>
         )}

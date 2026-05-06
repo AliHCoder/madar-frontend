@@ -16,36 +16,63 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+// ★ بهبود axiosRetry با مدیریت بهتر خطا
 const axiosRetry = async <T>(
   fn: () => Promise<T>,
-  retries = 3,
+  retries = 2, // کاهش تعداد تلاش‌ها
   delay = 1000,
 ): Promise<T> => {
   try {
     return await fn();
   } catch (error) {
-    if (retries === 0) throw error;
+    if (retries === 0) {
+      console.error("Max retries reached:", error);
+      throw error;
+    }
+    console.warn(`Retry attempt ${3 - retries}, waiting ${delay}ms...`);
     await new Promise((resolve) => setTimeout(resolve, delay));
     return axiosRetry(fn, retries - 1, delay * 2);
   }
 };
 
-api.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("token");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// ★ اینترسپتور درخواست با لاگ بهتر
+api.interceptors.request.use(
+  (config) => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      if (token) config.headers.Authorization = `Bearer ${token}`;
+    }
+    console.log(
+      `📡 Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`,
+    );
+    return config;
+  },
+  (error) => {
+    console.error("Request error:", error);
+    return Promise.reject(error);
+  },
+);
 
+// ★ اینترسپتور پاسخ با مدیریت خطا
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(
+      `✅ Response: ${response.config.url} - Status: ${response.status}`,
+    );
+    return response;
+  },
   (error: AxiosError) => {
-    console.error("API Error:", {
-      url: error.config?.url,
-      status: error.response?.status,
+    // لاگ دقیق‌تر خطا
+    const errorDetails = {
+      url: error.config?.url || "unknown",
+      method: error.config?.method?.toUpperCase() || "unknown",
+      status: error.response?.status || "no status",
+      statusText: error.response?.statusText || "no status text",
       message: error.message,
-    });
+      data: error.response?.data || "no data",
+    };
+
+    console.error("❌ API Error:", errorDetails);
     return Promise.reject(error);
   },
 );
@@ -57,16 +84,22 @@ const getFullImageUrl = (url?: string) => {
   return `${base}${url}`;
 };
 
-const normalizeId = (item: any) => ({
-  ...item,
-  id: item._id || item.id,
-  image: getFullImageUrl(item.image),
-  thumbnail: getFullImageUrl(item.thumbnail),
-  videoUrl: getFullImageUrl(item.videoUrl),
-  streamUrl: getFullImageUrl(item.streamUrl),
-});
+const normalizeId = (item: any) => {
+  if (!item || typeof item !== "object") return item;
+  return {
+    ...item,
+    id: item._id || item.id,
+    image: getFullImageUrl(item.image),
+    thumbnail: getFullImageUrl(item.thumbnail),
+    videoUrl: getFullImageUrl(item.videoUrl),
+    streamUrl: getFullImageUrl(item.streamUrl),
+  };
+};
 
-const normalizeArray = (arr: any[]) => arr.map(normalizeId);
+const normalizeArray = (arr: any[]) => {
+  if (!Array.isArray(arr)) return [];
+  return arr.map(normalizeId);
+};
 
 export const newsApi = {
   getLatest: async (page = 1, limit = 10): Promise<ApiResponse<Article[]>> => {
