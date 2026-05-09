@@ -182,7 +182,7 @@ export default function StreamPlayer({
               <video
                 src={
                   isLive
-                    ? "https://ir14.livekadeh.com/hls2/esratv.m3u8"
+                    ? "https://ir14.livekadeh.com/hls2/imanioo.m3u8"
                     : archivedStream?.videoUrl
                 }
                 className="w-full h-full"

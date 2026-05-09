@@ -22,7 +22,7 @@ export default async function StreamPage({
 
     // جایگزینی لینک استریم با لینک ثابت برای تمام لایوها
     (stream as LiveStream).streamUrl =
-      "https://ir14.livekadeh.com/hls2/esratv.m3u8";
+      "https://ir14.livekadeh.com/hls2/imanioo.m3u8";
     // حذف embedUrl تا مطمئن شویم تگ video به جای iframe رندر می‌شود
     stream.embedUrl = undefined;
   } catch {

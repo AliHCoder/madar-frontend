@@ -85,13 +85,14 @@ const getFullImageUrl = (url?: string) => {
 };
 
 const normalizeId = (item: any) => {
+  if (!item || typeof item !== "object") return item;
   return {
     ...item,
     id: item._id || item.id,
     image: getFullImageUrl(item.image),
     thumbnail: getFullImageUrl(item.thumbnail),
     videoUrl: getFullImageUrl(item.videoUrl),
-    streamUrl: getFullImageUrl(item.streamUrl), // ← مشکل اینجاست
+    streamUrl: getFullImageUrl(item.streamnpmUrl),
   };
 };
 
