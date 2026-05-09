@@ -17,11 +17,15 @@ export default async function StreamPage({
   let isLive = false;
 
   try {
-    // اول توی لایوها بگرد
     stream = await liveApi.getById(id);
     isLive = true;
+
+    // جایگزینی لینک استریم با لینک ثابت برای تمام لایوها
+    (stream as LiveStream).streamUrl =
+      "https://ir14.livekadeh.com/hls2/esratv.m3u8";
+    // حذف embedUrl تا مطمئن شویم تگ video به جای iframe رندر می‌شود
+    stream.embedUrl = undefined;
   } catch {
-    // اگه نبود، توی آرشیو بگرد
     try {
       stream = await archiveApi.getById(id);
     } catch {
@@ -36,7 +40,6 @@ export default async function StreamPage({
       {/* ─── هدر صفحه ─── */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 mb-8">
         <div className="max-w-6xl mx-auto px-4 py-6">
-          {/* breadcrumb */}
           <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
             <Link
               href="/"
@@ -63,21 +66,18 @@ export default async function StreamPage({
       <div className="max-w-6xl mx-auto px-4 pb-16">
         <StreamPlayer stream={stream} isLive={isLive} />
 
-        {/* ─── پیشنهادات مرتبط (اختیاری) ─── */}
+        {/* ─── پیشنهادات مرتبط ─── */}
         <div className="mt-12">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
             ویدیوهای مرتبط
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* می‌تونید از archiveApi.getByCategory استفاده کنید */}
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── تولید متادیتا برای SEO ───
 export async function generateMetadata({
   params,
 }: {

@@ -25,7 +25,7 @@ export default function StreamPlayer({
   const playerRef = useRef<HTMLDivElement>(null);
   const pulseRef = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   useEffect(() => {
     // انیمیشن پالس برای لایو
@@ -147,7 +147,6 @@ export default function StreamPlayer({
             </div>
           </>
         )}
-
         {/* ─── حالت پخش (وقتی کاربر play زد) ─── */}
         {isPlaying && (
           <div className="w-full h-full bg-black">
@@ -170,17 +169,30 @@ export default function StreamPlayer({
           </div>
         )}
 
-        {/* ─── دکمه تمام‌صفحه ─── */}
         {isPlaying && (
-          <button
-            onClick={() => {
-              const video = document.querySelector("video");
-              if (video) video.requestFullscreen();
-            }}
-            className="absolute bottom-4 right-4 z-30 p-2 bg-black/50 hover:bg-black/70 rounded-lg text-white transition-colors"
-          >
-            <Maximize2 size={18} />
-          </button>
+          <div className="w-full h-full bg-black">
+            {stream.embedUrl ? (
+              <iframe
+                src={stream.embedUrl}
+                className="w-full h-full"
+                allow="autoplay; encrypted-media; fullscreen"
+                allowFullScreen
+              />
+            ) : (
+              <video
+                src={
+                  isLive
+                    ? "https://ir14.livekadeh.com/hls2/esratv.m3u8"
+                    : archivedStream?.videoUrl
+                }
+                className="w-full h-full"
+                controls
+                autoPlay
+                playsInline
+                muted // <--- این خط حتما باید اضافه شود تا مرورگر اجازه پخش خودکار بدهد
+              />
+            )}
+          </div>
         )}
       </div>
 
