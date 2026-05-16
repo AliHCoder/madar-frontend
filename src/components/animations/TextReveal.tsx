@@ -1,9 +1,5 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export default function TextReveal({
   text,
@@ -18,34 +14,15 @@ export default function TextReveal({
     const el = ref.current;
     if (!el) return;
 
-    const words = text.split(" ");
-    el.innerHTML = words
-      .map(
-        (w) =>
-          `<span class="inline-block overflow-hidden"><span class="inline-block word-span">${w}</span></span>`,
-      )
-      .join(" ");
+    el.style.opacity = "0";
+    el.style.transform = "translateY(20px)";
 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        ".word-span",
-        { y: "100%", opacity: 0 },
-        {
-          y: "0%",
-          opacity: 1,
-          duration: 0.7,
-          stagger: 0.05,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: el,
-            start: "top 90%",
-          },
-        },
-      );
-    }, el);
-
-    return () => ctx.revert();
+    requestAnimationFrame(() => {
+      el.style.transition = "opacity 0.7s ease, transform 0.7s ease";
+      el.style.opacity = "1";
+      el.style.transform = "translateY(0)";
+    });
   }, [text]);
 
-  return <h2 ref={ref} className={className} />;
+  return <h2 ref={ref} className={className}>{text}</h2>;
 }

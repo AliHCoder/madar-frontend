@@ -1,12 +1,10 @@
 // components/news/HeroSection.tsx
 "use client";
-import { useEffect, useRef } from "react";
+import { useState } from "react";
 import { MyImage } from "@/components/ui/MyImage";
 import Link from "next/link";
-import { gsap } from "gsap";
 import { Article } from "@/types/news";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
 
 interface HeroSectionProps {
   topBanners: Article[];
@@ -19,46 +17,7 @@ export default function HeroSection({
   sideCards,
   sliderArticles,
 }: HeroSectionProps) {
-  const heroRef = useRef<HTMLDivElement>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
-
-  // اسلایدر خودکار
-  useEffect(() => {
-    if (sliderArticles.length === 0) return;
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % sliderArticles.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [sliderArticles.length]);
-
-  // انیمیشن ورود
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        ".top-banner",
-        { opacity: 0, y: -20 },
-        { opacity: 1, y: 0, duration: 0.6, stagger: 0.15, ease: "power3.out" },
-      );
-      gsap.fromTo(
-        ".side-card",
-        { opacity: 0, x: -30 },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 0.6,
-          delay: 0.3,
-          stagger: 0.15,
-          ease: "power3.out",
-        },
-      );
-      gsap.fromTo(
-        ".main-slider",
-        { opacity: 0, scale: 0.97 },
-        { opacity: 1, scale: 1, duration: 0.8, delay: 0.4, ease: "power3.out" },
-      );
-    }, heroRef);
-    return () => ctx.revert();
-  }, []);
 
   const prevSlide = () =>
     setCurrentSlide(
@@ -72,8 +31,20 @@ export default function HeroSection({
   if (sliderArticles.length === 0) return null;
 
   return (
-    <div ref={heroRef} className="w-full flex flex-col gap-3" dir="ltr">
-      {/* ===== موبایل: نمایش ۲ بنر پایین ===== */}
+    <div className="w-full flex flex-col gap-3" dir="ltr">
+      <style>{`
+        .animate-fade-in { animation: fadeIn 0.6s ease forwards; }
+        .animate-slide-left { animation: slideLeft 0.6s ease forwards; }
+        .animate-scale-in { animation: scaleIn 0.8s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+        .top-banner:nth-child(1) { animation-delay: 0.1s; opacity: 0; }
+        .top-banner:nth-child(2) { animation-delay: 0.25s; opacity: 0; }
+        .side-card:nth-child(1) { animation-delay: 0.4s; opacity: 0; }
+        .side-card:nth-child(2) { animation-delay: 0.55s; opacity: 0; }
+      `}</style>
+
       <div className="grid grid-cols-1 gap-3 md:hidden">
         {topBanners.slice(0, 2).map((banner) => (
           <Link
@@ -88,30 +59,22 @@ export default function HeroSection({
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
-
             <div className="absolute inset-0 flex justify-end items-center px-4">
               <h3 className="text-white font-black text-sm text-right leading-snug line-clamp-2">
                 {banner.title}
               </h3>
             </div>
-
-            <div
-              className="absolute bottom-0 left-0 right-0 h-0.5"
-              style={{
-                background: "linear-gradient(90deg, #FF5722, transparent)",
-              }}
-            />
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-transparent" />
           </Link>
         ))}
       </div>
 
-      {/* ===== ردیف بالا: دو بنر - مخفی در موبایل ===== */}
       <div className="hidden md:grid grid-cols-2 gap-3">
-        {topBanners.slice(0, 2).map((banner, i) => (
+        {topBanners.slice(0, 2).map((banner) => (
           <Link
             key={banner.id}
             href={`/article/${banner.id}`}
-            className="top-banner relative h-[100px] lg:h-[120px] rounded-xl overflow-hidden group block"
+            className="top-banner animate-fade-in relative h-[100px] lg:h-[120px] rounded-xl overflow-hidden group block"
           >
             <MyImage
               src={banner.image || "/assets/images/png/test.jpg"}
@@ -119,36 +82,24 @@ export default function HeroSection({
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
-            {/* گرادیان تیره */}
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
-
-            {/* محتوا */}
             <div className="absolute inset-0 flex justify-end items-center px-4 lg:px-5 gap-3">
               <h3 className="text-white font-black text-sm lg:text-lg xl:text-xl text-right leading-snug line-clamp-2">
                 {banner.title}
               </h3>
             </div>
-
-            {/* خط نارنجی پایین */}
-            <div
-              className="absolute bottom-0 left-0 right-0 h-0.5"
-              style={{
-                background: "linear-gradient(90deg, #FF5722, transparent)",
-              }}
-            />
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-transparent" />
           </Link>
         ))}
       </div>
 
-      {/* ===== ردیف پایین: ستون چپ + اسلایدر ===== */}
       <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] gap-3 h-[400px] sm:h-[450px] md:h-[520px]">
-        {/* --- ستون چپ: دو کارت زیر هم - مخفی در موبایل --- */}
         <div className="hidden md:flex flex-col gap-3 text-right h-full">
           {sideCards.slice(0, 2).map((card) => (
             <Link
               key={card.id}
               href={`/article/${card.id}`}
-              className="side-card relative flex-1 rounded-xl overflow-hidden group block"
+              className="side-card animate-slide-left relative flex-1 rounded-xl overflow-hidden group block"
             >
               <MyImage
                 src={card.image || "/assets/images/png/test.jpg"}
@@ -157,8 +108,6 @@ export default function HeroSection({
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-
-              {/* محتوا پایین */}
               <div className="absolute bottom-0 left-0 right-0 p-3 lg:p-4">
                 <h3 className="text-white font-black text-xs lg:text-sm leading-snug line-clamp-2">
                   {card.title}
@@ -168,9 +117,7 @@ export default function HeroSection({
           ))}
         </div>
 
-        {/* --- اسلایدر بزرگ - تمام عرض در موبایل --- */}
-        <div className="main-slider relative rounded-xl overflow-hidden group h-full">
-          {/* تصویر اسلاید فعال */}
+        <div className="main-slider animate-scale-in relative rounded-xl overflow-hidden group h-full">
           <MyImage
             src={active.image || "/assets/images/png/test.jpg"}
             alt={active.title}
@@ -178,42 +125,24 @@ export default function HeroSection({
             className="object-cover transition-all duration-700"
             priority
           />
-
-          {/* گرادیان */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(to top, rgba(153,27,27,0.3) 0%, transparent 55%)",
-            }}
-          />
+          <div className="absolute inset-0 bg-gradient-to-t from-red-900/30 to-transparent" />
 
-          {/* دکمه‌های ناوبری */}
           <button
             onClick={prevSlide}
             className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
-            style={{
-              background: "rgba(0,0,0,0.5)",
-              border: "1px solid rgba(255,255,255,0.2)",
-              backdropFilter: "blur(8px)",
-            }}
+            style={{ background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(8px)" }}
           >
             <ChevronLeft size={16} className="sm:w-5 sm:h-5 text-white" />
           </button>
           <button
             onClick={nextSlide}
             className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
-            style={{
-              background: "rgba(0,0,0,0.5)",
-              border: "1px solid rgba(255,255,255,0.2)",
-              backdropFilter: "blur(8px)",
-            }}
+            style={{ background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(8px)" }}
           >
             <ChevronRight size={16} className="sm:w-5 sm:h-5 text-white" />
           </button>
 
-          {/* نقاط اسلایدر */}
           <div className="absolute top-3 sm:top-4 left-1/2 -translate-x-1/2 flex gap-1 sm:gap-1.5 z-10">
             {sliderArticles.map((_, i) => (
               <button
@@ -224,42 +153,27 @@ export default function HeroSection({
                   width: i === currentSlide ? "20px" : "6px",
                   height: "6px",
                   borderRadius: "3px",
-                  background:
-                    i === currentSlide ? "#FF5722" : "rgba(255,255,255,0.4)",
+                  background: i === currentSlide ? "#FF5722" : "rgba(255,255,255,0.4)",
                 }}
               />
             ))}
           </div>
 
-          {/* محتوای اسلاید */}
           <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 lg:p-8">
-            {/* نام نویسنده بالای عنوان */}
             <p className="text-gray-300 text-xs sm:text-sm mb-1 sm:mb-2 font-medium">
               {active.author}
             </p>
-
             <Link href={`/article/${active.id}`}>
-              <h2
-                className="text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl text-right font-black leading-tight mb-2 sm:mb-4 max-w-2xl hover:text-orange-300 transition-colors duration-300 cursor-pointer"
-                style={{ textShadow: "0 2px 16px rgba(0,0,0,0.5)" }}
-              >
+              <h2 className="text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl text-right font-black leading-tight mb-2 sm:mb-4 max-w-2xl hover:text-orange-300 transition-colors duration-300 cursor-pointer">
                 {active.title}
               </h2>
             </Link>
           </div>
 
-          {/* خط قرمز پایین */}
-          <div
-            className="absolute bottom-0 left-0 right-0 h-1"
-            style={{
-              background:
-                "linear-gradient(90deg, transparent, #dc2626, rgba(255,255,255,0.4), #dc2626, transparent)",
-            }}
-          />
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent" />
         </div>
       </div>
 
-      {/* ===== موبایل: نمایش ۲ کارت پایین اسلایدر ===== */}
       <div className="grid grid-cols-2 gap-3 md:hidden">
         {sideCards.slice(0, 2).map((card) => (
           <Link
@@ -274,7 +188,6 @@ export default function HeroSection({
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-
             <div className="absolute bottom-0 left-0 right-0 p-3">
               <h3 className="text-white font-bold text-xs leading-snug line-clamp-2">
                 {card.title}

@@ -1,9 +1,6 @@
 // components/news/NewsCard.tsx
-"use client";
-import { useRef } from "react";
 import { MyImage } from "@/components/ui/MyImage";
 import Link from "next/link";
-import { gsap } from "gsap";
 import { Clock, User } from "lucide-react";
 import { Article } from "@/types/news";
 import ScrollReveal from "../animations/ScrollReveal";
@@ -16,29 +13,9 @@ export default function NewsCard({
   article: Article;
   delay?: number;
 }) {
-  const cardRef = useRef<HTMLDivElement>(null);
-
   return (
     <ScrollReveal delay={delay} direction="up">
-      <div
-        ref={cardRef}
-        onMouseEnter={() =>
-          gsap.to(cardRef.current, {
-            y: -6,
-            boxShadow: "0 20px 40px rgba(220,38,38,0.15)",
-            duration: 0.3,
-          })
-        }
-        onMouseLeave={() =>
-          gsap.to(cardRef.current, {
-            y: 0,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-            duration: 0.3,
-          })
-        }
-        className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 cursor-pointer"
-        style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
-      >
+      <div className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgba(220,38,38,0.15)] transition-shadow duration-300">
         <Link href={`/article/${article.id}`}>
           <div className="relative h-52 overflow-hidden">
             <MyImage

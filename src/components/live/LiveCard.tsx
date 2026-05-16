@@ -1,61 +1,17 @@
 // components/live/LiveCard.tsx
-"use client";
-import { useRef, useEffect } from "react";
 import { MyImage } from "@/components/ui/MyImage";
 import Link from "next/link";
-import { gsap } from "gsap";
 import { Eye, Clock } from "lucide-react";
 import { LiveStream } from "@/types/news";
 import CategoryBadge from "@/components/common/CategoryBadge";
 
 export default function LiveCard({
   stream,
-  delay,
 }: {
   stream: LiveStream;
-  delay?: number;
 }) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const pulseRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (stream.isLive && pulseRef.current) {
-      gsap.to(pulseRef.current, {
-        scale: 1.4,
-        opacity: 0,
-        duration: 1.5,
-        repeat: -1,
-        ease: "power1.out",
-      });
-    }
-  }, [stream.isLive]);
-
-  const handleMouseEnter = () => {
-    gsap.to(cardRef.current, {
-      y: -6,
-      boxShadow: "0 20px 40px rgba(220,38,38,0.2)",
-      duration: 0.3,
-      ease: "power2.out",
-    });
-  };
-
-  const handleMouseLeave = () => {
-    gsap.to(cardRef.current, {
-      y: 0,
-      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-      duration: 0.3,
-      ease: "power2.out",
-    });
-  };
-
   return (
-    <div
-      ref={cardRef}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 cursor-pointer relative"
-      style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
-    >
+    <div className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 cursor-pointer relative shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgba(220,38,38,0.2)] transition-shadow duration-300">
       <Link href={`/live/${stream.id}`}>
         <div className="relative h-52 overflow-hidden">
           <MyImage
@@ -68,11 +24,7 @@ export default function LiveCard({
           <div className="absolute inset-0 bg-gradient-to-br from-red-900/30 to-transparent" />
 
           <div className="absolute top-3 right-3 z-20">
-            <CategoryBadge
-              category={stream.category}
-              variant="solid"
-              size="sm"
-            />
+            <CategoryBadge category={stream.category} variant="solid" size="sm" />
           </div>
 
           {stream.isLive && (
@@ -82,10 +34,6 @@ export default function LiveCard({
                   <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
                   پخش زنده
                 </div>
-                <div
-                  ref={pulseRef}
-                  className="absolute inset-0 bg-red-600 rounded-full"
-                />
               </div>
             </div>
           )}
@@ -129,9 +77,7 @@ export default function LiveCard({
             ) : stream.status === "upcoming" ? (
               <span className="text-orange-500 font-semibold">به زودی</span>
             ) : (
-              <span className="text-gray-400 dark:text-gray-500">
-                پایان یافته
-              </span>
+              <span className="text-gray-400 dark:text-gray-500">پایان یافته</span>
             )}
           </div>
         </div>

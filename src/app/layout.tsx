@@ -22,7 +22,7 @@ export default function RootLayout({
       <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 antialiased">
         <ThemeProvider>
           <Header />
-          <main className=" mx-auto  pb-4 lg:mr-[calc(var(--sidebar-width)+1rem)] transition-all duration-300">
+          <main className=" mx-auto p-6 pb-4 lg:mr-[calc(var(--sidebar-width)+1rem)] transition-all duration-300">
             {children}
           </main>
         </ThemeProvider>

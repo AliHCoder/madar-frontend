@@ -25,22 +25,21 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // ---------- اولین fetch: مقالات اخیر + پخش زنده ----------
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitial = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // ★ فچ موازی با fallback
-        const [latest, breaking, liveStreams, archivedVideos] =
-          await Promise.allSettled([
-            newsApi.getLatest(1, 20),
-            newsApi.getBreaking(),
-            liveApi.getActive(),
-            archiveApi.getRecent(3),
-          ]);
+        const [latest, breaking, liveStreams] = await Promise.allSettled([
+          newsApi.getLatest(1, 10), // تعداد مقالات را نصف می‌کنیم
+          newsApi.getBreaking(),
+          liveApi.getActive(),
+        ]);
 
-        setData({
+        setData((prev) => ({
+          ...prev,
           latest:
             latest.status === "fulfilled"
               ? latest.value
@@ -48,18 +47,32 @@ export default function HomePage() {
           breaking: breaking.status === "fulfilled" ? breaking.value : [],
           liveStreams:
             liveStreams.status === "fulfilled" ? liveStreams.value : [],
-          archivedVideos:
-            archivedVideos.status === "fulfilled" ? archivedVideos.value : [],
-        });
+        }));
       } catch (err: any) {
-        console.error("Error fetching data:", err);
+        console.error("Error fetching initial data:", err);
         setError(err?.message || "خطا در بارگذاری داده‌ها");
       } finally {
         setLoading(false);
       }
     };
+    fetchInitial();
+  }, []);
 
-    fetchData();
+  // ---------- بارگذاری آرشیو (بعد از اولین رندر) ----------
+  useEffect(() => {
+    const fetchArchive = async () => {
+      try {
+        const archived = await archiveApi.getRecent(3);
+        setData((prev) => ({
+          ...prev,
+          archivedVideos: archived,
+        }));
+      } catch (e) {
+        console.warn("Archive fetch failed:", e);
+      }
+    };
+    // اجرای بعد از اولین paint
+    requestAnimationFrame(() => fetchArchive());
   }, []);
 
   // Loading state

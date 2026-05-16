@@ -1,4 +1,3 @@
-// app/live/[id]/page.tsx
 import { notFound } from "next/navigation";
 import StreamPlayer from "@/components/stream/StreamPlayer";
 import { liveApi, archiveApi } from "@/lib/api";
@@ -19,12 +18,6 @@ export default async function StreamPage({
   try {
     stream = await liveApi.getById(id);
     isLive = true;
-
-    // جایگزینی لینک استریم با لینک ثابت برای تمام لایوها
-    (stream as LiveStream).streamUrl =
-      "https://ir14.livekadeh.com/hls2/imanioo.m3u8";
-    // حذف embedUrl تا مطمئن شویم تگ video به جای iframe رندر می‌شود
-    stream.embedUrl = undefined;
   } catch {
     try {
       stream = await archiveApi.getById(id);

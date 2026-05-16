@@ -27,9 +27,23 @@ export default function StreamPlayer({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
 
+  // Determine stream type once
+  const liveStream = isLive ? (stream as LiveStream) : null;
+  const archivedStream = !isLive ? (stream as ArchivedStream) : null;
+  const hasPlayedEntrance = useRef(false);
+
+  // Cleanup any lingering tweens when component unmounts
   useEffect(() => {
-    // انیمیشن پالس برای لایو
-    if (isLive && (stream as LiveStream).isLive && pulseRef.current) {
+    return () => {
+      if (pulseRef.current) gsap.killTweensOf(pulseRef.current);
+      if (playerRef.current) gsap.killTweensOf(playerRef.current);
+    };
+  }, []);
+
+  // Main animation effect – runs only when live status changes
+  useEffect(() => {
+    // Pulse animation for live streams
+    if (isLive && liveStream?.isLive && pulseRef.current) {
       gsap.to(pulseRef.current, {
         scale: 1.4,
         opacity: 0,
@@ -39,17 +53,17 @@ export default function StreamPlayer({
       });
     }
 
-    // انیمیشن ورود
-    gsap.from(playerRef.current, {
-      opacity: 0,
-      y: 30,
-      duration: 0.8,
-      ease: "power3.out",
-    });
-  }, [isLive, stream]);
-
-  const liveStream = isLive ? (stream as LiveStream) : null;
-  const archivedStream = !isLive ? (stream as ArchivedStream) : null;
+    // Entrance animation – run only once per component mount
+    if (!hasPlayedEntrance.current && playerRef.current) {
+      gsap.from(playerRef.current, {
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        ease: "power3.out",
+      });
+      hasPlayedEntrance.current = true;
+    }
+  }, [isLive, liveStream?.isLive]);
 
   return (
     <div ref={playerRef} className="space-y-6">
@@ -160,31 +174,6 @@ export default function StreamPlayer({
             ) : (
               <video
                 src={isLive ? liveStream?.streamUrl : archivedStream?.videoUrl}
-                className="w-full h-full"
-                controls
-                autoPlay
-                playsInline
-              />
-            )}
-          </div>
-        )}
-
-        {isPlaying && (
-          <div className="w-full h-full bg-black">
-            {stream.embedUrl ? (
-              <iframe
-                src={stream.embedUrl}
-                className="w-full h-full"
-                allow="autoplay; encrypted-media; fullscreen"
-                allowFullScreen
-              />
-            ) : (
-              <video
-                src={
-                  isLive
-                    ? "https://ir14.livekadeh.com/hls2/imanioo.m3u8"
-                    : archivedStream?.videoUrl
-                }
                 className="w-full h-full"
                 controls
                 autoPlay

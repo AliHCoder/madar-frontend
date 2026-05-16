@@ -1,9 +1,5 @@
 "use client";
 import { useEffect, useRef, ReactNode } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface Props {
   children: ReactNode;
@@ -24,28 +20,19 @@ export default function ScrollReveal({
     const el = ref.current;
     if (!el) return;
 
-    const from: gsap.TweenVars = { opacity: 0 };
-    if (direction === "up") from.y = 50;
-    else if (direction === "left") from.x = -50;
-    else if (direction === "right") from.x = 50;
+    el.style.opacity = "0";
+    
+    let x = 0, y = 0;
+    if (direction === "up") y = 30;
+    else if (direction === "left") x = -30;
+    else if (direction === "right") x = 30;
+    el.style.transform = `translate(${x}px, ${y}px)`;
 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(el, from, {
-        opacity: 1,
-        x: 0,
-        y: 0,
-        duration: 0.8,
-        delay,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: el,
-          start: "top 88%",
-          toggleActions: "play none none none",
-        },
-      });
+    requestAnimationFrame(() => {
+      el.style.transition = `opacity 0.6s ease ${delay}s, transform 0.6s ease ${delay}s`;
+      el.style.opacity = "1";
+      el.style.transform = "translate(0, 0)";
     });
-
-    return () => ctx.revert();
   }, [delay, direction]);
 
   return (

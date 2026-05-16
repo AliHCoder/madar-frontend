@@ -30,11 +30,7 @@ export default async function LivePage() {
         <section>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {liveNow.map((stream, i) => (
-              <LiveCard
-                key={stream.id || stream.id || i} // ★ _id یا id یا fallback به index
-                stream={stream}
-                delay={i * 0.1}
-              />
+              <LiveCard key={stream.id || i} stream={stream} />
             ))}
           </div>
         </section>
@@ -45,11 +41,7 @@ export default async function LivePage() {
         <section>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {upcoming.map((stream, i) => (
-              <LiveCard
-                key={stream.id || stream.id || i} // ★ _id یا id یا fallback به index
-                stream={stream}
-                delay={i * 0.1}
-              />
+              <LiveCard key={stream.id || i} stream={stream} />
             ))}
           </div>
         </section>

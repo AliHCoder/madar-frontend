@@ -3,33 +3,36 @@
 // ─── اینترفیس پایه برای دسته‌بندی ────────────────────────────────
 export interface Category {
   id: string;
-  name: string; // نام فارسی مثل "سیاسی"
-  slug: string; // شناسه انگلیسی مثل "politics"
-  nameEn: string; // نام انگلیسی مثل "Politics"
-  color: string; // کد رنگ مثل "#dc2626"
+  _id?: string;
+  name: string;
+  slug: string;
+  nameEn: string;
+  color: string;
 }
 
 // ─── اینترفیس مقاله خبری ─────────────────────────────────────────
 export interface Article {
   id: string;
+  _id?: string;
   title: string;
   excerpt: string;
   content: string;
   image: string;
-  category: Category; // به‌جای category و categorySlug جدا
+  category: Category;
   author: string;
   publishedAt: string;
   readTime: number;
   tags: string[];
   views: number;
   isBreaking: boolean;
-  isLive?: boolean; // اگر خبر همزمان پخش زنده هم دارد
-  liveUrl?: string; // لینک پخش زنده مرتبط با خبر
+  isLive?: boolean;
+  liveUrl?: string;
 }
 
 // ─── اینترفیس پخش زنده ───────────────────────────────────────────
 export interface LiveStream {
   id: string;
+  _id?: string;
   title: string;
   description: string;
   thumbnail: string;
@@ -37,26 +40,27 @@ export interface LiveStream {
   startTime: string;
   isLive: boolean;
   viewers: number;
-  streamUrl: string; // ★ لینک پخش (HLS/WebRTC)
-  embedUrl?: string; // لینک embed برای iframe
-  chatEnabled?: boolean; // آیا چت زنده فعال است؟
+  streamUrl: string;
+  embedUrl?: string;
+  chatEnabled?: boolean;
   status: "live" | "upcoming" | "ended";
 }
 
 // ─── اینترفیس ویدیوی آرشیوی ──────────────────────────────────────
 export interface ArchivedStream {
   id: string;
+  _id?: string;
   title: string;
   description: string;
   thumbnail: string;
   category: Category;
   recordedAt: string;
-  duration: number; // به دقیقه
+  duration: number;
   views: number;
-  videoUrl: string; // ★ لینک ویدیو (MP4/HLS)
-  embedUrl?: string; // لینک embed برای iframe
+  videoUrl: string;
+  embedUrl?: string;
   quality?: "720p" | "1080p" | "4K";
-  highlights?: string[]; // تایم‌استمپ‌های مهم
+  highlights?: string[];
 }
 
 // ─── نوع محتوا ───────────────────────────────────────────────────

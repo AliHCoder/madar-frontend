@@ -77,11 +77,14 @@ api.interceptors.response.use(
   },
 );
 
-const getFullImageUrl = (url?: string) => {
-  if (!url) return "/assets/images/png/test.jpg";
+const BACKEND_URL = "http://localhost:3001";
+
+const getFullImageUrl = (url?: string | null) => {
+  if (!url || typeof url !== "string" || url.trim() === "") {
+    return "/assets/images/png/test.jpg";
+  }
   if (url.startsWith("http")) return url;
-  const base = API_URL.replace("/api", "");
-  return `${base}${url}`;
+  return `${BACKEND_URL}${url}`;
 };
 
 const normalizeId = (item: any) => {
