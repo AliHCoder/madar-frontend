@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MyImage } from "@/components/ui/MyImage";
 import Link from "next/link";
 import { HeroItem } from "@/types/news";
@@ -24,6 +24,12 @@ export default function HeroSection({
     );
   const nextSlide = () =>
     setCurrentSlide((prev) => (prev + 1) % sliderArticles.length);
+
+  useEffect(() => {
+    if (sliderArticles.length < 2) return;
+    const timer = setInterval(nextSlide, 5000);
+    return () => clearInterval(timer);
+  }, [sliderArticles.length]);
 
   const active = sliderArticles[currentSlide];
 
