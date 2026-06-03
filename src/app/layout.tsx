@@ -5,8 +5,11 @@ import { ThemeProvider } from "@/providers/ThemeProvider";
 import { ThemeScript } from "@/providers/theme-script";
 
 export const metadata: Metadata = {
-  title: "خبرگزاری | آخرین اخبار مدار",
-  description: "جدیدترین اخبار ایران و جهان",
+  title: {
+    default: "مدار | خبرگزاری و پخش زنده",
+    template: "%s | مدار",
+  },
+  description: "جدیدترین اخبار ایران و جهان، پخش زنده و آرشیو ویدیوهای مدار",
 };
 
 export default function RootLayout({

@@ -10,11 +10,25 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    // error logged silently
   }, [error]);
 
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center text-center gap-6">
+      <div className="flex items-center gap-3 mb-2">
+        <div
+          className="w-12 h-12 rounded-xl flex items-center justify-center"
+          style={{
+            background: "linear-gradient(135deg, #dc2626, #991b1b)",
+            boxShadow: "0 4px 12px rgba(220,38,38,0.3)",
+          }}
+        >
+          <span className="text-white font-black text-lg">م</span>
+        </div>
+        <span className="text-3xl font-black text-gray-900 dark:text-white">
+          مدار
+        </span>
+      </div>
       <div className="text-6xl">⚠️</div>
       <div className="space-y-2">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-white">

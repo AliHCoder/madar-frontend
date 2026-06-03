@@ -25,56 +25,29 @@ const axiosRetry = async <T>(
   try {
     return await fn();
   } catch (error) {
-    if (retries === 0) {
-      console.error("Max retries reached:", error);
-      throw error;
-    }
-    console.warn(`Retry attempt ${3 - retries}, waiting ${delay}ms...`);
+    if (retries === 0) throw error;
     await new Promise((resolve) => setTimeout(resolve, delay));
     return axiosRetry(fn, retries - 1, delay * 2);
   }
 };
 
-// ★ اینترسپتور درخواست با لاگ بهتر
 api.interceptors.request.use(
   (config) => {
+    if (config.method === "get" || config.method === "GET") {
+      config.params = { ...config.params, _t: Date.now() };
+    }
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
       if (token) config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log(
-      `📡 Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`,
-    );
     return config;
   },
-  (error) => {
-    console.error("Request error:", error);
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );
 
-// ★ اینترسپتور پاسخ با مدیریت خطا
 api.interceptors.response.use(
-  (response) => {
-    console.log(
-      `✅ Response: ${response.config.url} - Status: ${response.status}`,
-    );
-    return response;
-  },
-  (error: AxiosError) => {
-    // لاگ دقیق‌تر خطا
-    const errorDetails = {
-      url: error.config?.url || "unknown",
-      method: error.config?.method?.toUpperCase() || "unknown",
-      status: error.response?.status || "no status",
-      statusText: error.response?.statusText || "no status text",
-      message: error.message,
-      data: error.response?.data || "no data",
-    };
-
-    console.error("❌ API Error:", errorDetails);
-    return Promise.reject(error);
-  },
+  (response) => response,
+  (error: AxiosError) => Promise.reject(error),
 );
 
 const BACKEND_URL = "http://localhost:3001";
@@ -87,15 +60,45 @@ const getFullImageUrl = (url?: string | null) => {
   return `${BACKEND_URL}${url}`;
 };
 
+const normalizeTags = (tags: any): string[] => {
+  if (!tags) return [];
+
+  const parseDeep = (val: any): any => {
+    if (typeof val === "string" && /^[[{]/.test(val)) {
+      try { return parseDeep(JSON.parse(val)); } catch {}
+    }
+    return val;
+  };
+  const cleaned = parseDeep(tags);
+
+  if (Array.isArray(cleaned)) {
+    if (cleaned.some((t: any) => typeof t === "string" && /[[\]]/.test(t))) {
+      try {
+        const joined = cleaned.join(",");
+        const parsed = JSON.parse(joined);
+        if (Array.isArray(parsed)) return normalizeTags(parsed);
+      } catch {}
+    }
+    return cleaned.map((t: any) => String(t).replace(/^["\s]+|["\s]+$/g, ""));
+  }
+
+  if (typeof cleaned === "string") {
+    return cleaned.split(",").map((t: string) => t.trim().replace(/^["\s]+|["\s]+$/g, "")).filter(Boolean);
+  }
+
+  return [];
+};
+
 const normalizeId = (item: any) => {
   if (!item || typeof item !== "object") return item;
   return {
     ...item,
     id: item._id || item.id,
+    tags: normalizeTags(item.tags),
     image: getFullImageUrl(item.image),
     thumbnail: getFullImageUrl(item.thumbnail),
     videoUrl: getFullImageUrl(item.videoUrl),
-    streamUrl: getFullImageUrl(item.streamnpmUrl),
+    streamUrl: getFullImageUrl(item.streamUrl),
   };
 };
 
@@ -142,13 +145,23 @@ export const newsApi = {
     });
   },
 
-  search: async (query: string): Promise<Article[]> => {
+  search: async (query: string, page = 1, limit = 10): Promise<ApiResponse<Article[]>> => {
     return axiosRetry(async () => {
       const { data } = await api.get(
-        `/articles/search?q=${encodeURIComponent(query)}`,
+        `/articles/search?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
       );
-      const list = Array.isArray(data) ? data : data.data || [];
-      return normalizeArray(list);
+      if (data.data) data.data = normalizeArray(data.data);
+      return data;
+    });
+  },
+
+  getByTags: async (tags: string[], page = 1, limit = 10): Promise<ApiResponse<Article[]>> => {
+    return axiosRetry(async () => {
+      const { data } = await api.get(
+        `/articles?tags=${tags.join(",")}&page=${page}&limit=${limit}`,
+      );
+      if (data.data) data.data = normalizeArray(data.data);
+      return data;
     });
   },
 };
@@ -205,6 +218,16 @@ export const archiveApi = {
       return normalizeId(data);
     });
   },
+
+  search: async (query: string, page = 1, limit = 10): Promise<ApiResponse<ArchivedStream[]>> => {
+    return axiosRetry(async () => {
+      const { data } = await api.get(
+        `/archive/search?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
+      );
+      if (data.data) data.data = normalizeArray(data.data);
+      return data;
+    });
+  },
 };
 
 export const categoryApi = {
@@ -221,6 +244,91 @@ export const categoryApi = {
       const { data } = await api.get(`/categories/${slug}`);
       return normalizeId(data);
     });
+  },
+};
+
+export interface Comment {
+  _id: string;
+  id: string;
+  article: string;
+  name: string;
+  email?: string;
+  body: string;
+  isApproved: boolean;
+  createdAt: string;
+}
+
+export const commentApi = {
+  getByArticle: async (articleId: string): Promise<Comment[]> => {
+    return axiosRetry(async () => {
+      const { data } = await api.get(`/comments/article/${articleId}`);
+      return (Array.isArray(data) ? data : data.data || []).map((c: any) => ({
+        ...c,
+        id: c._id || c.id,
+      }));
+    });
+  },
+  create: async (article: string, name: string, body: string, email?: string): Promise<Comment> => {
+    const { data } = await api.post("/comments", { article, name, body, email });
+    return { ...data, id: data._id || data.id };
+  },
+};
+
+export const ratingApi = {
+  submit: async (targetType: "live" | "archive" | "article", targetId: string, score: number) => {
+    return axiosRetry(async () => {
+      const { data } = await api.post("/ratings", { targetType, targetId, score });
+      return data;
+    });
+  },
+  getRating: async (targetType: "live" | "archive" | "article", targetId: string) => {
+    return axiosRetry(async () => {
+      const { data } = await api.get(`/ratings/${targetType}/${targetId}`);
+      return data;
+    });
+  },
+};
+
+export interface TagItem {
+  _id: string;
+  id: string;
+  name: string;
+  slug: string;
+  count: number;
+}
+
+export const tagApi = {
+  getAll: async (page = 1, limit = 50): Promise<ApiResponse<TagItem[]>> => {
+    const { data } = await api.get(`/tags?page=${page}&limit=${limit}`);
+    if (data.data) data.data = data.data.map((t: any) => ({ ...t, id: t._id || t.id }));
+    return data;
+  },
+  getBySlug: async (slug: string): Promise<TagItem> => {
+    const { data } = await api.get(`/tags/${slug}`);
+    return { ...data, id: data._id || data.id };
+  },
+  getArticles: async (slug: string, page = 1, limit = 10): Promise<ApiResponse<Article[]>> => {
+    const { data } = await api.get(`/tags/${slug}/articles?page=${page}&limit=${limit}`);
+    if (data.data) data.data = normalizeArray(data.data);
+    return data;
+  },
+};
+
+export interface HeroItem {
+  type: "article" | "archive";
+  data: Article | ArchivedStream;
+}
+
+export const heroApi = {
+  getSettings: async (): Promise<{ isActive: boolean; items: HeroItem[] }> => {
+    const { data } = await api.get("/hero");
+    if (data.items) {
+      data.items = data.items.map((item: any) => ({
+        ...item,
+        data: normalizeId(item.data),
+      }));
+    }
+    return data;
   },
 };
 

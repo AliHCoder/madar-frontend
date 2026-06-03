@@ -15,8 +15,8 @@ export default function ArchiveCard({
 }) {
   return (
     <ScrollReveal delay={delay} direction="up">
-      <div className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgba(220,38,38,0.15)] transition-shadow duration-300">
-        <Link href={`/archive/${stream.id}`}>
+      <div className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgba(220,38,38,0.15)] transition-shadow duration-300 h-full flex flex-col">
+        <Link href={`/archive/${stream.id}`} className="flex-1 flex flex-col">
           <div className="relative h-52 overflow-hidden">
             <MyImage
               src={stream.thumbnail || "/assets/images/png/test.jpg"}
@@ -32,9 +32,11 @@ export default function ArchiveCard({
               </div>
             </div>
 
-            <div className="absolute top-3 right-3 z-20">
-              <CategoryBadge category={stream.category} variant="solid" size="sm" />
-            </div>
+            {stream.category && (
+              <div className="absolute top-3 right-3 z-20">
+                <CategoryBadge category={stream.category} variant="solid" size="sm" />
+              </div>
+            )}
 
             <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
               <Clock size={12} />
@@ -48,7 +50,7 @@ export default function ArchiveCard({
             )}
           </div>
 
-          <div className="p-5">
+          <div className="p-5 flex-1 flex flex-col justify-between">
             <h3 className="text-gray-900 dark:text-white font-bold text-lg leading-snug mb-2 line-clamp-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors duration-200">
               {stream.title}
             </h3>

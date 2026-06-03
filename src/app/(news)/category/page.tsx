@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // app/categories/page.tsx
 import { categoryApi, newsApi } from "@/lib/api";
 import ScrollReveal from "@/components/animations/ScrollReveal";

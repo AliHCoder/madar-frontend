@@ -11,7 +11,7 @@ export default function CategoriesError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Categories page error:", error);
+    // error logged silently
   }, [error]);
 
   return (

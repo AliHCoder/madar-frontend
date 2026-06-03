@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // app/category/[slug]/page.tsx
 import { newsApi } from "@/lib/api";
 import NewsGrid from "@/components/news/NewsGrid";

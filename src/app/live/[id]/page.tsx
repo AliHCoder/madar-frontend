@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { notFound } from "next/navigation";
 import StreamPlayer from "@/components/stream/StreamPlayer";
 import { liveApi, archiveApi } from "@/lib/api";
@@ -41,12 +43,14 @@ export default async function StreamPage({
               خانه
             </Link>
             <ArrowRight size={12} />
-            <Link
-              href={`/category/${stream.category.slug}`}
-              className="hover:text-red-600 dark:hover:text-red-400 transition-colors"
-            >
-              {stream.category.name}
-            </Link>
+            {stream.category && (
+              <Link
+                href={`/category/${stream.category.slug}`}
+                className="hover:text-red-600 dark:hover:text-red-400 transition-colors"
+              >
+                {stream.category.name}
+              </Link>
+            )}
             <ArrowRight size={12} />
             <span className="text-gray-900 dark:text-white font-medium truncate max-w-[200px]">
               {stream.title}

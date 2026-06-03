@@ -24,8 +24,8 @@ export default function SearchBar() {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const data = await newsApi.search(query);
-        setResults(data);
+        const res = await newsApi.search(query);
+        setResults(res.data || []);
       } catch {
         setResults([]);
       } finally {

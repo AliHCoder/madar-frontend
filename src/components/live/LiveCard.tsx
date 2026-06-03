@@ -11,8 +11,8 @@ export default function LiveCard({
   stream: LiveStream;
 }) {
   return (
-    <div className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 cursor-pointer relative shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgba(220,38,38,0.2)] transition-shadow duration-300">
-      <Link href={`/live/${stream.id}`}>
+    <div className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 cursor-pointer relative shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgba(220,38,38,0.2)] transition-shadow duration-300 h-full flex flex-col">
+      <Link href={`/live/${stream.id}`} className="flex-1 flex flex-col">
         <div className="relative h-52 overflow-hidden">
           <MyImage
             src={stream.thumbnail || "/assets/images/png/test.jpg"}
@@ -23,9 +23,11 @@ export default function LiveCard({
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-br from-red-900/30 to-transparent" />
 
-          <div className="absolute top-3 right-3 z-20">
-            <CategoryBadge category={stream.category} variant="solid" size="sm" />
-          </div>
+          {stream.category && (
+            <div className="absolute top-3 right-3 z-20">
+              <CategoryBadge category={stream.category} variant="solid" size="sm" />
+            </div>
+          )}
 
           {stream.isLive && (
             <div className="absolute top-3 left-3 z-20 flex items-center gap-2">
@@ -54,7 +56,7 @@ export default function LiveCard({
           )}
         </div>
 
-        <div className="p-5">
+        <div className="p-5 flex-1 flex flex-col justify-between">
           <h3 className="text-gray-900 dark:text-white font-bold text-lg leading-snug mb-2 line-clamp-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors duration-200">
             {stream.title}
           </h3>

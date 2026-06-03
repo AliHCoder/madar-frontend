@@ -2,13 +2,15 @@
 "use client";
 
 import HeroSection from "@/components/news/HeroSection";
-import NewsGrid from "@/components/news/NewsGrid";
-import { newsApi, liveApi, archiveApi } from "@/lib/api";
-import { TrendingUp, Clock, Radio, Archive } from "lucide-react";
+import Link from "next/link";
+import { newsApi, liveApi, archiveApi, heroApi } from "@/lib/api";
+import { TrendingUp, Clock, Radio, Archive, ArrowLeft } from "lucide-react";
+import HorizontalScrollRow from "@/components/ui/HorizontalScrollRow";
+import NewsCard from "@/components/news/NewsCard";
 import LiveCard from "@/components/live/LiveCard";
 import ArchiveCard from "@/components/archive/ArchiveCard";
 import { useState, useEffect } from "react";
-import type { Article, LiveStream, ArchivedStream } from "@/types/news";
+import type { Article, LiveStream, ArchivedStream, HeroItem } from "@/types/news";
 
 export default function HomePage() {
   const [data, setData] = useState<{
@@ -22,6 +24,10 @@ export default function HomePage() {
     liveStreams: [],
     archivedVideos: [],
   });
+  const [heroSettings, setHeroSettings] = useState<{
+    isActive: boolean;
+    items: { type: "article" | "archive" | "live"; data: any }[];
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,11 +38,14 @@ export default function HomePage() {
         setLoading(true);
         setError(null);
 
-        const [latest, breaking, liveStreams] = await Promise.allSettled([
-          newsApi.getLatest(1, 10), // تعداد مقالات را نصف می‌کنیم
+        const [latest, breaking, liveStreams, hero] = await Promise.allSettled([
+          newsApi.getLatest(1, 10),
           newsApi.getBreaking(),
           liveApi.getActive(),
+          heroApi.getSettings(),
         ]);
+
+        if (hero.status === "fulfilled") setHeroSettings(hero.value);
 
         setData((prev) => ({
           ...prev,
@@ -49,7 +58,6 @@ export default function HomePage() {
             liveStreams.status === "fulfilled" ? liveStreams.value : [],
         }));
       } catch (err: any) {
-        console.error("Error fetching initial data:", err);
         setError(err?.message || "خطا در بارگذاری داده‌ها");
       } finally {
         setLoading(false);
@@ -68,7 +76,7 @@ export default function HomePage() {
           archivedVideos: archived,
         }));
       } catch (e) {
-        console.warn("Archive fetch failed:", e);
+        // ignore
       }
     };
     // اجرای بعد از اولین paint
@@ -123,8 +131,35 @@ export default function HomePage() {
     ? data.archivedVideos
     : [];
 
-  // ★ اگر هیچ داده‌ای نیست
-  if (allArticles.length === 0) {
+  const toHeroItem = (
+    item: { type: "article" | "archive" | "live"; data: any },
+  ): HeroItem => {
+    let link = `/article/${item.data.id}`;
+    if (item.type === "archive") link = `/archive/${item.data.id}`;
+    else if (item.type === "live") link = `/live/${item.data.id}`;
+    return {
+      id: item.data.id,
+      title: item.data.title,
+      image: item.data.image || item.data.thumbnail || "",
+      author: item.data.author || "",
+      link,
+      type: item.type,
+    };
+  };
+
+  const heroItems: HeroItem[] =
+    heroSettings?.isActive && heroSettings.items.length > 0
+      ? heroSettings.items.map(toHeroItem)
+      : allArticles.slice(0, 8).map((a: Article) => ({
+          id: a.id,
+          title: a.title,
+          image: a.image,
+          author: a.author,
+          link: `/article/${a.id}`,
+          type: "article" as const,
+        }));
+
+  if (allArticles.length === 0 && heroItems.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-600 dark:text-gray-300">
@@ -139,16 +174,23 @@ export default function HomePage() {
     (s) => s?.isLive || s?.status === "live",
   ).length;
 
+  const liveList = safeLiveStreams.slice(0, 3);
+  const MAX_ITEMS = 10;
+  const combinedItems = [
+    ...liveList.map((s: LiveStream) => ({ type: "live" as const, data: s, id: s.id })),
+    ...rest.slice(0, MAX_ITEMS - liveList.length).map((a: Article) => ({ type: "article" as const, data: a, id: a.id })),
+  ];
+
   return (
     <div className="min-h-screen">
       <main className="max-w-7xl mx-auto px-4 pb-16 mt-8 space-y-14">
         {/* Hero */}
-        {hero && (
+        {heroItems.length > 0 && (
           <section className="relative">
             <HeroSection
-              topBanners={allArticles.slice(0, 2)}
-              sideCards={allArticles.slice(2, 4)}
-              sliderArticles={allArticles.slice(4, 8)}
+              topBanners={heroItems.slice(0, 2)}
+              sideCards={heroItems.slice(2, 4)}
+              sliderArticles={heroItems.slice(4, 8)}
             />
           </section>
         )}
@@ -204,13 +246,17 @@ export default function HomePage() {
               }}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {safeLiveStreams
-                .slice(0, 3)
-                .map((stream) =>
-                  stream ? <LiveCard key={stream.id} stream={stream} /> : null,
-                )}
-            </div>
+            <HorizontalScrollRow>
+              {combinedItems.map((item) => (
+                <div key={item.id} className="min-w-[300px] w-[300px] flex-shrink-0">
+                  {item.type === "live" ? (
+                    <LiveCard stream={item.data} />
+                  ) : (
+                    <NewsCard article={item.data} delay={0} />
+                  )}
+                </div>
+              ))}
+            </HorizontalScrollRow>
           </section>
         )}
 
@@ -238,6 +284,13 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
+              <Link
+                href="/search"
+                className="hidden lg:flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors font-medium"
+              >
+                مشاهده همه
+                <ArrowLeft size={16} />
+              </Link>
             </div>
 
             <div
@@ -248,32 +301,47 @@ export default function HomePage() {
               }}
             />
 
-            <NewsGrid articles={rest} />
+            <HorizontalScrollRow>
+              {rest.slice(0, MAX_ITEMS).map((article: Article) => (
+                <div key={article.id} className="min-w-[300px] w-[300px] flex-shrink-0">
+                  <NewsCard article={article} delay={0} />
+                </div>
+              ))}
+            </HorizontalScrollRow>
           </section>
         )}
 
         {/* آرشیو */}
         {safeArchivedVideos.length > 0 && (
           <section className="relative">
-            <div className="flex items-center gap-3 mb-8">
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{
-                  background: "linear-gradient(135deg, #dc2626, #991b1b)",
-                  boxShadow:
-                    "0 0 20px rgba(220,38,38,0.35), inset 0 1px 0 rgba(255,255,255,0.2)",
-                }}
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{
+                    background: "linear-gradient(135deg, #dc2626, #991b1b)",
+                    boxShadow:
+                      "0 0 20px rgba(220,38,38,0.35), inset 0 1px 0 rgba(255,255,255,0.2)",
+                  }}
+                >
+                  <Archive size={16} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black leading-none text-gray-900 dark:text-white">
+                    آرشیو
+                  </h2>
+                  <p className="text-[11px] text-red-500 font-semibold tracking-widest mt-0.5">
+                    ARCHIVE
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/archive"
+                className="hidden lg:flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors font-medium"
               >
-                <Archive size={16} className="text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-black leading-none text-gray-900 dark:text-white">
-                  آرشیو
-                </h2>
-                <p className="text-[11px] text-red-500 font-semibold tracking-widest mt-0.5">
-                  ARCHIVE
-                </p>
-              </div>
+                مشاهده همه
+                <ArrowLeft size={16} />
+              </Link>
             </div>
 
             <div
@@ -284,39 +352,41 @@ export default function HomePage() {
               }}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {safeArchivedVideos
-                .slice(0, 3)
-                .map((stream) =>
-                  stream ? (
-                    <ArchiveCard key={stream.id} stream={stream} />
-                  ) : null,
-                )}
-            </div>
+            <HorizontalScrollRow>
+              {safeArchivedVideos.slice(0, 3).map((stream) =>
+                stream ? (
+                  <div key={stream.id} className="min-w-[300px] w-[300px] flex-shrink-0">
+                    <ArchiveCard stream={stream} />
+                  </div>
+                ) : null,
+              )}
+            </HorizontalScrollRow>
           </section>
         )}
 
         {/* پربازدیدترین */}
-        {rest.length > 0 && (
+        {allArticles.length > 0 && (
           <section className="relative">
-            <div className="flex items-center gap-3 mb-8">
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{
-                  background: "linear-gradient(135deg, #dc2626, #991b1b)",
-                  boxShadow:
-                    "0 0 20px rgba(220,38,38,0.35), inset 0 1px 0 rgba(255,255,255,0.2)",
-                }}
-              >
-                <TrendingUp size={16} className="text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-black leading-none text-gray-900 dark:text-white">
-                  پربازدیدترین
-                </h2>
-                <p className="text-[11px] text-red-500 font-semibold tracking-widest mt-0.5">
-                  TRENDING
-                </p>
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{
+                    background: "linear-gradient(135deg, #dc2626, #991b1b)",
+                    boxShadow:
+                      "0 0 20px rgba(220,38,38,0.35), inset 0 1px 0 rgba(255,255,255,0.2)",
+                  }}
+                >
+                  <TrendingUp size={16} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black leading-none text-gray-900 dark:text-white">
+                    پربازدیدترین
+                  </h2>
+                  <p className="text-[11px] text-red-500 font-semibold tracking-widest mt-0.5">
+                    TRENDING
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -328,7 +398,13 @@ export default function HomePage() {
               }}
             />
 
-            <NewsGrid articles={rest.slice(0, 3)} />
+            <HorizontalScrollRow>
+              {allArticles.slice(hero ? 1 : 0, MAX_ITEMS + (hero ? 1 : 0)).map((article: Article) => (
+                <div key={article.id} className="min-w-[300px] w-[300px] flex-shrink-0">
+                  <NewsCard article={article} delay={0} />
+                </div>
+              ))}
+            </HorizontalScrollRow>
           </section>
         )}
       </main>

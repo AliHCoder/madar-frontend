@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // app/archive/page.tsx
 import ArchiveCard from "@/components/archive/ArchiveCard";
 import { archiveApi } from "@/lib/api";
@@ -11,9 +13,14 @@ export default async function ArchivePage() {
   } catch {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <p className="text-center py-20 text-gray-500 dark:text-gray-400 text-lg">
-          ⚠️ خطا در دریافت آرشیو
-        </p>
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Archive size={28} className="text-red-500" />
+          </div>
+          <p className="text-gray-500 dark:text-gray-400 text-lg">
+            خطا در دریافت آرشیو مدار
+          </p>
+        </div>
       </div>
     );
   }
@@ -66,4 +73,11 @@ export default async function ArchivePage() {
       )}
     </div>
   );
+}
+
+export async function generateMetadata() {
+  return {
+    title: "آرشیو",
+    description: "آرشیو ویدیوهای ضبط شده مدار",
+  };
 }

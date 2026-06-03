@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { LiveStream, ArchivedStream } from "@/types/news";
 import CategoryBadge from "@/components/common/CategoryBadge";
+import StarRating from "@/components/ui/StarRating";
+import { ratingApi } from "@/lib/api";
 
 export default function StreamPlayer({
   stream,
@@ -26,11 +28,35 @@ export default function StreamPlayer({
   const pulseRef = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [rating, setRating] = useState(stream.averageRating || 0);
+  const [ratingCount, setRatingCount] = useState(stream.ratingCount || 0);
+  const [userScore, setUserScore] = useState<number | null>(null);
 
   // Determine stream type once
   const liveStream = isLive ? (stream as LiveStream) : null;
   const archivedStream = !isLive ? (stream as ArchivedStream) : null;
   const hasPlayedEntrance = useRef(false);
+
+  const handleRate = async (score: number) => {
+    const targetType = isLive ? "live" : "archive";
+    try {
+      const result = await ratingApi.submit(targetType, stream.id, score);
+      setRating(result.averageRating);
+      setRatingCount(result.ratingCount);
+      setUserScore(result.userScore);
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    const targetType = isLive ? "live" : "archive";
+    ratingApi.getRating(targetType, stream.id).then((data) => {
+      setRating(data.averageRating);
+      setRatingCount(data.ratingCount);
+      setUserScore(data.userScore);
+    }).catch(() => {});
+  }, [stream.id, isLive]);
 
   // Cleanup any lingering tweens when component unmounts
   useEffect(() => {
@@ -190,16 +216,21 @@ export default function StreamPlayer({
         {/* هدر با کتگوری */}
         <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3 leading-relaxed">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2 leading-relaxed">
               {stream.title}
             </h1>
+            {stream.subtitle && (
+              <p className="text-lg text-gray-500 dark:text-gray-400 font-medium mb-3">
+                {stream.subtitle}
+              </p>
+            )}
             <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg leading-relaxed">
               {stream.description}
             </p>
           </div>
 
           {/* CategoryBadge */}
-          <CategoryBadge category={stream.category} variant="solid" />
+          {stream.category && <CategoryBadge category={stream.category} variant="solid" />}
         </div>
 
         {/* ─── Quality Badge (برای آرشیو) ─── */}
@@ -276,11 +307,44 @@ export default function StreamPlayer({
           )}
 
           {/* ─── تگ‌ها ─── */}
-          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-            <Tag size={16} className="text-red-400" />
-            <span className="text-sm">{stream.category.slug}</span>
+          {stream.category && (
+            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+              <Tag size={16} className="text-red-400" />
+              <span className="text-sm">{stream.category.slug}</span>
+            </div>
+          )}
+        </div>
+
+        {/* ─── امتیاز ─── */}
+        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              امتیاز به این ویدیو
+            </h3>
+            <StarRating
+              rating={rating}
+              count={ratingCount}
+              onRate={handleRate}
+              userScore={userScore}
+              size="md"
+            />
           </div>
         </div>
+
+        {/* ─── محتوای کامل ─── */}
+        {stream.content && (
+          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div
+              className="prose prose-lg max-w-none text-gray-700 dark:text-gray-300
+                prose-headings:text-gray-900 dark:prose-headings:text-white
+                prose-a:text-red-600 dark:prose-a:text-red-400
+                prose-strong:text-gray-900 dark:prose-strong:text-white
+                prose-blockquote:border-red-500
+                leading-loose"
+              dangerouslySetInnerHTML={{ __html: stream.content }}
+            />
+          </div>
+        )}
 
         {/* ─── هایلایت‌های آرشیو ─── */}
         {archivedStream?.highlights && archivedStream.highlights.length > 0 && (

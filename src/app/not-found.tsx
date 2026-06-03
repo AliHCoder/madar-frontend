@@ -34,6 +34,22 @@ export default function NotFound() {
       ref={ref}
       className="min-h-[70vh] flex flex-col items-center justify-center text-center gap-6"
     >
+      {/* لوگوی مدار */}
+      <div className="nf-num flex items-center gap-3 mb-2">
+        <div
+          className="w-12 h-12 rounded-xl flex items-center justify-center"
+          style={{
+            background: "linear-gradient(135deg, #dc2626, #991b1b)",
+            boxShadow: "0 4px 12px rgba(220,38,38,0.3)",
+          }}
+        >
+          <span className="text-white font-black text-lg">م</span>
+        </div>
+        <span className="text-3xl font-black text-gray-900 dark:text-white">
+          مدار
+        </span>
+      </div>
+
       {/* عدد ۴۰۴ */}
       <h1
         className="nf-num text-9xl font-black text-transparent select-none"
@@ -47,9 +63,9 @@ export default function NotFound() {
 
       {/* متن */}
       <div className="nf-text space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900">صفحه پیدا نشد</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">صفحه پیدا نشد</h2>
         <p className="text-gray-400 text-sm">
-          صفحه‌ای که دنبالش می‌گشتی وجود ندارد یا حذف شده.
+          صفحه‌ای که دنبالش می‌گشتی در مدار وجود ندارد یا حذف شده.
         </p>
       </div>
 

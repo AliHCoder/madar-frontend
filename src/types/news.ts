@@ -8,6 +8,9 @@ export interface Category {
   slug: string;
   nameEn: string;
   color: string;
+  parent?: string | Category | null;
+  children?: Category[];
+  order?: number;
 }
 
 // ─── اینترفیس مقاله خبری ─────────────────────────────────────────
@@ -15,6 +18,7 @@ export interface Article {
   id: string;
   _id?: string;
   title: string;
+  subtitle?: string;
   excerpt: string;
   content: string;
   image: string;
@@ -27,6 +31,10 @@ export interface Article {
   isBreaking: boolean;
   isLive?: boolean;
   liveUrl?: string;
+  newsCode?: string;
+  sourceUrl?: string;
+  averageRating?: number;
+  ratingCount?: number;
 }
 
 // ─── اینترفیس پخش زنده ───────────────────────────────────────────
@@ -34,9 +42,12 @@ export interface LiveStream {
   id: string;
   _id?: string;
   title: string;
+  subtitle?: string;
   description: string;
+  content?: string;
   thumbnail: string;
-  category: Category;
+  category?: Category;
+  categories?: Category[];
   startTime: string;
   isLive: boolean;
   viewers: number;
@@ -44,6 +55,8 @@ export interface LiveStream {
   embedUrl?: string;
   chatEnabled?: boolean;
   status: "live" | "upcoming" | "ended";
+  averageRating?: number;
+  ratingCount?: number;
 }
 
 // ─── اینترفیس ویدیوی آرشیوی ──────────────────────────────────────
@@ -51,9 +64,12 @@ export interface ArchivedStream {
   id: string;
   _id?: string;
   title: string;
+  subtitle?: string;
   description: string;
+  content?: string;
   thumbnail: string;
-  category: Category;
+  category?: Category;
+  categories?: Category[];
   recordedAt: string;
   duration: number;
   views: number;
@@ -61,10 +77,22 @@ export interface ArchivedStream {
   embedUrl?: string;
   quality?: "720p" | "1080p" | "4K";
   highlights?: string[];
+  averageRating?: number;
+  ratingCount?: number;
 }
 
 // ─── نوع محتوا ───────────────────────────────────────────────────
 export type ContentType = "article" | "live" | "archive";
+
+// ─── آیتم هیرو (مخلوطی از مقاله و آرشیو) ──────────────────────────
+export interface HeroItem {
+  id: string;
+  title: string;
+  image: string;
+  author: string;
+  link: string;
+  type: ContentType;
+}
 
 // ─── پاسخ API ─────────────────────────────────────────────────────
 export interface ApiResponse<T> {

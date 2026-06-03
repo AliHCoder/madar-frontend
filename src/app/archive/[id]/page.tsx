@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // app/archive/[id]/page.tsx
 import { notFound } from "next/navigation";
 import { archiveApi } from "@/lib/api";

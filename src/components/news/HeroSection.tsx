@@ -1,15 +1,14 @@
-// components/news/HeroSection.tsx
 "use client";
 import { useState } from "react";
 import { MyImage } from "@/components/ui/MyImage";
 import Link from "next/link";
-import { Article } from "@/types/news";
+import { HeroItem } from "@/types/news";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface HeroSectionProps {
-  topBanners: Article[];
-  sideCards: Article[];
-  sliderArticles: Article[];
+  topBanners: HeroItem[];
+  sideCards: HeroItem[];
+  sliderArticles: HeroItem[];
 }
 
 export default function HeroSection({
@@ -49,7 +48,7 @@ export default function HeroSection({
         {topBanners.slice(0, 2).map((banner) => (
           <Link
             key={banner.id}
-            href={`/article/${banner.id}`}
+            href={banner.link}
             className="relative h-[100px] rounded-xl overflow-hidden group block"
           >
             <MyImage
@@ -57,6 +56,7 @@ export default function HeroSection({
               alt={banner.title}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="eager"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
             <div className="absolute inset-0 flex justify-end items-center px-4">
@@ -73,7 +73,7 @@ export default function HeroSection({
         {topBanners.slice(0, 2).map((banner) => (
           <Link
             key={banner.id}
-            href={`/article/${banner.id}`}
+            href={banner.link}
             className="top-banner animate-fade-in relative h-[100px] lg:h-[120px] rounded-xl overflow-hidden group block"
           >
             <MyImage
@@ -81,6 +81,7 @@ export default function HeroSection({
               alt={banner.title}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="eager"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
             <div className="absolute inset-0 flex justify-end items-center px-4 lg:px-5 gap-3">
@@ -98,7 +99,7 @@ export default function HeroSection({
           {sideCards.slice(0, 2).map((card) => (
             <Link
               key={card.id}
-              href={`/article/${card.id}`}
+              href={card.link}
               className="side-card animate-slide-left relative flex-1 rounded-xl overflow-hidden group block"
             >
               <MyImage
@@ -106,6 +107,7 @@ export default function HeroSection({
                 alt={card.title}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
+                loading="eager"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-3 lg:p-4">
@@ -163,7 +165,7 @@ export default function HeroSection({
             <p className="text-gray-300 text-xs sm:text-sm mb-1 sm:mb-2 font-medium">
               {active.author}
             </p>
-            <Link href={`/article/${active.id}`}>
+            <Link href={active.link}>
               <h2 className="text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl text-right font-black leading-tight mb-2 sm:mb-4 max-w-2xl hover:text-orange-300 transition-colors duration-300 cursor-pointer">
                 {active.title}
               </h2>
@@ -178,7 +180,7 @@ export default function HeroSection({
         {sideCards.slice(0, 2).map((card) => (
           <Link
             key={card.id}
-            href={`/article/${card.id}`}
+            href={card.link}
             className="relative h-[150px] rounded-xl overflow-hidden group block"
           >
             <MyImage

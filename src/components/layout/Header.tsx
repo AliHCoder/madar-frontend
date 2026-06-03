@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation"; // ★ اضافه کردن usePathname
+import { usePathname, useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import {
   Search,
@@ -85,7 +85,8 @@ const socialLinks = [
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
-  const pathname = usePathname(); // ★ گرفتن مسیر فعلی
+  const pathname = usePathname();
+  const router = useRouter();
 
   const headerRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -226,6 +227,11 @@ export default function Header() {
                 placeholder="جستجو در اخبار، دسته‌بندی‌ها و ..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && searchQuery.trim()) {
+                    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                  }
+                }}
                 className="w-full pr-12 pl-4 py-3 rounded-xl border transition-all text-sm
                   bg-gray-50/80 dark:bg-gray-800/80 
                   border-gray-200 dark:border-gray-700 
