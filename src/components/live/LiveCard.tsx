@@ -13,7 +13,7 @@ export default function LiveCard({
   return (
     <div className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 cursor-pointer relative shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgba(220,38,38,0.2)] transition-shadow duration-300 h-full flex flex-col">
       <Link href={`/live/${stream.id}`} className="flex-1 flex flex-col">
-        <div className="relative h-52 overflow-hidden">
+        <div className="relative h-40 md:h-52 overflow-hidden">
           <MyImage
             src={stream.thumbnail || "/assets/images/png/test.jpg"}
             alt={stream.title}

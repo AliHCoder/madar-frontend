@@ -17,7 +17,7 @@ export default function NewsCard({
     <ScrollReveal delay={delay} direction="up">
       <div className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgba(220,38,38,0.15)] transition-shadow duration-300 h-full flex flex-col">
         <Link href={`/article/${article.id}`} className="flex-1 flex flex-col">
-          <div className="relative h-52 overflow-hidden">
+          <div className="relative h-40 md:h-52 overflow-hidden">
             <MyImage
               src={article.image || "/assets/images/png/test.jpg"}
               alt={article.title}

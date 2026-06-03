@@ -30,41 +30,53 @@ export default function HomePage() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const fetchInitial = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [latest, breaking, liveStreams, hero] = await Promise.allSettled([
+        newsApi.getLatest(1, 10),
+        newsApi.getBreaking(),
+        liveApi.getActive(),
+        heroApi.getSettings(),
+      ]);
+
+      if (hero.status === "fulfilled") setHeroSettings(hero.value);
+
+      setData((prev) => ({
+        ...prev,
+        latest:
+          latest.status === "fulfilled"
+            ? latest.value
+            : { data: [], total: 0 },
+        breaking: breaking.status === "fulfilled" ? breaking.value : [],
+        liveStreams:
+          liveStreams.status === "fulfilled" ? liveStreams.value : [],
+      }));
+
+      // If ALL initial APIs failed, set error
+      const allFailed =
+        latest.status !== "fulfilled" &&
+        breaking.status !== "fulfilled" &&
+        liveStreams.status !== "fulfilled" &&
+        hero.status !== "fulfilled";
+      if (allFailed) {
+        setError("خطا در بارگذاری داده‌ها");
+      }
+    } catch (err: any) {
+      setError(err?.message || "خطا در بارگذاری داده‌ها");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ---------- اولین fetch: مقالات اخیر + پخش زنده ----------
   useEffect(() => {
-    const fetchInitial = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const [latest, breaking, liveStreams, hero] = await Promise.allSettled([
-          newsApi.getLatest(1, 10),
-          newsApi.getBreaking(),
-          liveApi.getActive(),
-          heroApi.getSettings(),
-        ]);
-
-        if (hero.status === "fulfilled") setHeroSettings(hero.value);
-
-        setData((prev) => ({
-          ...prev,
-          latest:
-            latest.status === "fulfilled"
-              ? latest.value
-              : { data: [], total: 0 },
-          breaking: breaking.status === "fulfilled" ? breaking.value : [],
-          liveStreams:
-            liveStreams.status === "fulfilled" ? liveStreams.value : [],
-        }));
-      } catch (err: any) {
-        setError(err?.message || "خطا در بارگذاری داده‌ها");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchInitial();
-  }, []);
+  }, [retryCount]);
 
   // ---------- بارگذاری آرشیو (بعد از اولین رندر) ----------
   useEffect(() => {
@@ -113,7 +125,7 @@ export default function HomePage() {
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => setRetryCount((c) => c + 1)}
             className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
           >
             بارگذاری مجدد
@@ -161,10 +173,24 @@ export default function HomePage() {
 
   if (allArticles.length === 0 && heroItems.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600 dark:text-gray-300">
-          داده‌ای برای نمایش وجود ندارد
-        </p>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl max-w-md">
+          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-2xl">📡</span>
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            در حال بارگذاری
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">
+            داده‌ای یافت نشد. ممکن است اتصال اینترنت شما قطع باشد.
+          </p>
+          <button
+            onClick={() => setRetryCount((c) => c + 1)}
+            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+          >
+            تلاش مجدد
+          </button>
+        </div>
       </div>
     );
   }
@@ -174,16 +200,12 @@ export default function HomePage() {
     (s) => s?.isLive || s?.status === "live",
   ).length;
 
-  const liveList = safeLiveStreams.slice(0, 3);
+  const liveList = safeLiveStreams.slice(0, 10);
   const MAX_ITEMS = 10;
-  const combinedItems = [
-    ...liveList.map((s: LiveStream) => ({ type: "live" as const, data: s, id: s.id })),
-    ...rest.slice(0, MAX_ITEMS - liveList.length).map((a: Article) => ({ type: "article" as const, data: a, id: a.id })),
-  ];
 
   return (
     <div className="min-h-screen">
-      <main className="max-w-7xl mx-auto px-4 pb-16 mt-8 space-y-14">
+      <main className="max-w-7xl mx-auto px-4 pb-16 mt-8 space-y-10 md:space-y-14">
         {/* Hero */}
         {heroItems.length > 0 && (
           <section className="relative">
@@ -198,7 +220,7 @@ export default function HomePage() {
         {/* پخش زنده */}
         {safeLiveStreams.length > 0 && (
           <section className="relative">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6 md:mb-8">
               <div className="flex items-center gap-3">
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -239,7 +261,7 @@ export default function HomePage() {
             </div>
 
             <div
-              className="w-full h-px mb-8"
+              className="w-full h-px mb-6 md:mb-8"
               style={{
                 background:
                   "linear-gradient(90deg, #dc2626 0%, rgba(220,38,38,0.3) 50%, transparent 100%)",
@@ -247,13 +269,9 @@ export default function HomePage() {
             />
 
             <HorizontalScrollRow>
-              {combinedItems.map((item) => (
-                <div key={item.id} className="min-w-[300px] w-[300px] flex-shrink-0">
-                  {item.type === "live" ? (
-                    <LiveCard stream={item.data} />
-                  ) : (
-                    <NewsCard article={item.data} delay={0} />
-                  )}
+              {liveList.map((stream) => (
+                <div key={stream.id} className="min-w-[260px] md:min-w-[300px] w-[260px] md:w-[300px] flex-shrink-0">
+                  <LiveCard stream={stream} />
                 </div>
               ))}
             </HorizontalScrollRow>
@@ -263,7 +281,7 @@ export default function HomePage() {
         {/* آخرین اخبار */}
         {rest.length > 0 && (
           <section className="relative">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6 md:mb-8">
               <div className="flex items-center gap-3">
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -294,7 +312,7 @@ export default function HomePage() {
             </div>
 
             <div
-              className="w-full h-px mb-8"
+              className="w-full h-px mb-6 md:mb-8"
               style={{
                 background:
                   "linear-gradient(90deg, #dc2626 0%, rgba(220,38,38,0.3) 50%, transparent 100%)",
@@ -303,7 +321,7 @@ export default function HomePage() {
 
             <HorizontalScrollRow>
               {rest.slice(0, MAX_ITEMS).map((article: Article) => (
-                <div key={article.id} className="min-w-[300px] w-[300px] flex-shrink-0">
+                <div key={article.id} className="min-w-[260px] md:min-w-[300px] w-[260px] md:w-[300px] flex-shrink-0">
                   <NewsCard article={article} delay={0} />
                 </div>
               ))}
@@ -314,7 +332,7 @@ export default function HomePage() {
         {/* آرشیو */}
         {safeArchivedVideos.length > 0 && (
           <section className="relative">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6 md:mb-8">
               <div className="flex items-center gap-3">
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -345,7 +363,7 @@ export default function HomePage() {
             </div>
 
             <div
-              className="w-full h-px mb-8"
+              className="w-full h-px mb-6 md:mb-8"
               style={{
                 background:
                   "linear-gradient(90deg, #dc2626 0%, rgba(220,38,38,0.3) 50%, transparent 100%)",
@@ -355,7 +373,7 @@ export default function HomePage() {
             <HorizontalScrollRow>
               {safeArchivedVideos.slice(0, 3).map((stream) =>
                 stream ? (
-                  <div key={stream.id} className="min-w-[300px] w-[300px] flex-shrink-0">
+                  <div key={stream.id} className="min-w-[260px] md:min-w-[300px] w-[260px] md:w-[300px] flex-shrink-0">
                     <ArchiveCard stream={stream} />
                   </div>
                 ) : null,
@@ -367,7 +385,7 @@ export default function HomePage() {
         {/* پربازدیدترین */}
         {allArticles.length > 0 && (
           <section className="relative">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6 md:mb-8">
               <div className="flex items-center gap-3">
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -391,7 +409,7 @@ export default function HomePage() {
             </div>
 
             <div
-              className="w-full h-px mb-8"
+              className="w-full h-px mb-6 md:mb-8"
               style={{
                 background:
                   "linear-gradient(90deg, #dc2626 0%, rgba(220,38,38,0.3) 50%, transparent 100%)",
@@ -400,7 +418,7 @@ export default function HomePage() {
 
             <HorizontalScrollRow>
               {allArticles.slice(hero ? 1 : 0, MAX_ITEMS + (hero ? 1 : 0)).map((article: Article) => (
-                <div key={article.id} className="min-w-[300px] w-[300px] flex-shrink-0">
+                <div key={article.id} className="min-w-[260px] md:min-w-[300px] w-[260px] md:w-[300px] flex-shrink-0">
                   <NewsCard article={article} delay={0} />
                 </div>
               ))}
