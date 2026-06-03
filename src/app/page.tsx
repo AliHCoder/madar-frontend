@@ -1,5 +1,4 @@
-// app/page.tsx
-"use client";
+export const dynamic = "force-dynamic";
 
 import HeroSection from "@/components/news/HeroSection";
 import Link from "next/link";
@@ -9,172 +8,56 @@ import HorizontalScrollRow from "@/components/ui/HorizontalScrollRow";
 import NewsCard from "@/components/news/NewsCard";
 import LiveCard from "@/components/live/LiveCard";
 import ArchiveCard from "@/components/archive/ArchiveCard";
-import { useState, useEffect } from "react";
 import type { Article, LiveStream, ArchivedStream, HeroItem } from "@/types/news";
 
-export default function HomePage() {
-  const [data, setData] = useState<{
-    latest: any;
-    breaking: any;
-    liveStreams: LiveStream[];
-    archivedVideos: ArchivedStream[];
-  }>({
-    latest: null,
-    breaking: null,
-    liveStreams: [],
-    archivedVideos: [],
-  });
-  const [heroSettings, setHeroSettings] = useState<{
-    isActive: boolean;
-    items: { type: "article" | "archive" | "live"; data: any }[];
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
+export default async function HomePage() {
+  const [latestRes, liveRes, archiveRes, heroRes] = await Promise.allSettled([
+    newsApi.getLatest(1, 10),
+    liveApi.getActive(),
+    archiveApi.getRecent(3),
+    heroApi.getSettings(),
+  ]);
 
-  // ---------- فچ کردن دیتا (هر API مستقلاً) ----------
-  useEffect(() => {
-    let cancelled = false;
+  const latest = latestRes.status === "fulfilled" ? latestRes.value : { data: [], total: 0 };
+  const safeLiveStreams: LiveStream[] = liveRes.status === "fulfilled" ? liveRes.value : [];
+  const safeArchivedVideos: ArchivedStream[] = archiveRes.status === "fulfilled" ? archiveRes.value : [];
+  const heroSettings = heroRes.status === "fulfilled" ? heroRes.value : null;
 
-    const fetchAll = async () => {
-      setLoading(true);
-      setError(null);
-
-      let anySuccess = false;
-
-      const safeSet = <T,>(key: string, value: T) => {
-        if (cancelled) return;
-        anySuccess = true;
-        setData((prev) => ({ ...prev, [key]: value }));
-      };
-
-      newsApi.getLatest(1, 10).then(
-        (res) => safeSet("latest", res),
-        () => safeSet("latest", { data: [], total: 0 }),
-      );
-
-      newsApi.getBreaking().then(
-        (res) => safeSet("breaking", res),
-        () => {},
-      );
-
-      liveApi.getActive().then(
-        (res) => safeSet("liveStreams", res),
-        () => safeSet("liveStreams", []),
-      );
-
-      heroApi.getSettings().then(
-        (res) => {
-          if (!cancelled) setHeroSettings(res);
-        },
-        () => {},
-      );
-
-      // حداکثر ۱۲ ثانیه صبر کن بعد لودینگ رو بردار
-      await new Promise((r) => setTimeout(r, 12000));
-      if (cancelled) return;
-
-      if (!anySuccess) setError("خطا در بارگذاری داده‌ها");
-      setLoading(false);
-    };
-
-    fetchAll();
-
-    return () => { cancelled = true; };
-  }, [retryCount]);
-
-  // ---------- بارگذاری آرشیو (بعد از اولین رندر) ----------
-  useEffect(() => {
-    const fetchArchive = async () => {
-      try {
-        const archived = await archiveApi.getRecent(3);
-        setData((prev) => ({
-          ...prev,
-          archivedVideos: archived,
-        }));
-      } catch (e) {
-        // ignore
-      }
-    };
-    // اجرای بعد از اولین paint
-    requestAnimationFrame(() => fetchArchive());
-  }, []);
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative w-20 h-20 mx-auto mb-6">
-            <div className="absolute inset-0 border-4 border-red-200 dark:border-red-900 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-transparent border-t-red-500 rounded-full animate-spin"></div>
-          </div>
-          <p className="text-gray-600 dark:text-gray-300 text-lg font-medium">
-            در حال بارگذاری...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="text-center bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl max-w-md">
-          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">⚠️</span>
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            خطا در بارگذاری
-          </h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
-          <button
-            onClick={() => setRetryCount((c) => c + 1)}
-            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-          >
-            بارگذاری مجدد
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const allArticles = data.latest?.data || [];
-  const safeLiveStreams = Array.isArray(data.liveStreams)
-    ? data.liveStreams
-    : [];
-  const safeArchivedVideos = Array.isArray(data.archivedVideos)
-    ? data.archivedVideos
-    : [];
+  const allArticles: Article[] = latest.data || [];
 
   const toHeroItem = (
     item: { type: "article" | "archive" | "live"; data: any },
-  ): HeroItem => {
-    let link = `/article/${item.data.id}`;
-    if (item.type === "archive") link = `/archive/${item.data.id}`;
-    else if (item.type === "live") link = `/live/${item.data.id}`;
-    return {
-      id: item.data.id,
-      title: item.data.title,
-      image: item.data.image || item.data.thumbnail || "",
-      author: item.data.author || "",
-      link,
-      type: item.type,
-    };
+  ): HeroItem | null => {
+    try {
+      if (!item?.data) return null;
+      const id = item.data._id || item.data.id;
+      if (!id) return null;
+      let link = `/article/${id}`;
+      if (item.type === "archive") link = `/archive/${id}`;
+      else if (item.type === "live") link = `/live/${id}`;
+      return {
+        id,
+        title: item.data.title || "",
+        image: item.data.image || item.data.thumbnail || "",
+        author: item.data.author || "",
+        link,
+        type: item.type,
+      };
+    } catch {
+      return null;
+    }
   };
 
-  const heroItems: HeroItem[] =
-    heroSettings?.isActive && heroSettings.items.length > 0
-      ? heroSettings.items.map(toHeroItem)
-      : allArticles.slice(0, 8).map((a: Article) => ({
-          id: a.id,
-          title: a.title,
-          image: a.image,
-          author: a.author,
-          link: `/article/${a.id}`,
-          type: "article" as const,
-        }));
+  const heroItems: HeroItem[] = heroSettings?.isActive && heroSettings.items.length > 0
+    ? heroSettings.items.map(toHeroItem).filter(Boolean) as HeroItem[]
+    : allArticles.slice(0, 8).map((a) => ({
+        id: a.id,
+        title: a.title,
+        image: a.image,
+        author: a.author,
+        link: `/article/${a.id}`,
+        type: "article" as const,
+      }));
 
   if (allArticles.length === 0 && heroItems.length === 0) {
     return (
@@ -189,12 +72,6 @@ export default function HomePage() {
           <p className="text-gray-600 dark:text-gray-300 mb-4">
             داده‌ای یافت نشد. ممکن است اتصال اینترنت شما قطع باشد.
           </p>
-          <button
-            onClick={() => setRetryCount((c) => c + 1)}
-            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-          >
-            تلاش مجدد
-          </button>
         </div>
       </div>
     );
@@ -211,7 +88,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       <main className="max-w-7xl mx-auto px-4 pb-16 mt-8 space-y-10 md:space-y-14">
-        {/* Hero */}
         {heroItems.length > 0 && (
           <section className="relative">
             <HeroSection
@@ -222,7 +98,6 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* پخش زنده */}
         {safeLiveStreams.length > 0 && (
           <section className="relative">
             <div className="flex items-center justify-between mb-6 md:mb-8">
@@ -283,7 +158,6 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* آخرین اخبار */}
         {rest.length > 0 && (
           <section className="relative">
             <div className="flex items-center justify-between mb-6 md:mb-8">
@@ -334,7 +208,6 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* آرشیو */}
         {safeArchivedVideos.length > 0 && (
           <section className="relative">
             <div className="flex items-center justify-between mb-6 md:mb-8">
@@ -387,7 +260,6 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* پربازدیدترین */}
         {allArticles.length > 0 && (
           <section className="relative">
             <div className="flex items-center justify-between mb-6 md:mb-8">
