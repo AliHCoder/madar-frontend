@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "api.madaar.tv",
+      },
+      {
+        protocol: "https",
         hostname: "localhost",
       },
       {
