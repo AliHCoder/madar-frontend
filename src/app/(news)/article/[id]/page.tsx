@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 // app/article/[id]/page.tsx
 import { MyImage } from "@/components/ui/MyImage";
 import { notFound } from "next/navigation";
-import { newsApi } from "@/lib/api";
+import { newsApi, commentApi } from "@/lib/api";
 import ScrollReveal from "@/components/animations/ScrollReveal";
 import TextReveal from "@/components/animations/TextReveal";
 import SidebarLatest from "@/components/news/SidebarLatest";
@@ -21,16 +21,19 @@ export default async function ArticlePage(props: {
 
   let article;
   let related;
+  let initialComments: any[] = [];
 
   try {
-    const [articleData, relatedData] = await Promise.all([
+    const [articleData, relatedData, commentsData] = await Promise.all([
       newsApi.getById(id),
       newsApi.getLatest(1, 6),
+      commentApi.getByArticle(id).catch(() => []),
     ]);
     article = articleData;
     related = (relatedData.data || [])
       .filter((a) => a && a.id !== id)
       .slice(0, 5);
+    initialComments = Array.isArray(commentsData) ? commentsData : [];
   } catch {
     notFound();
   }
@@ -202,7 +205,7 @@ export default async function ArticlePage(props: {
         )}
 
         {/* دیدگاه‌ها */}
-        <CommentSection articleId={article.id} />
+        <CommentSection articleId={article.id} initialComments={initialComments} />
       </article>
 
       {/* ─── سایدبار ─── */}

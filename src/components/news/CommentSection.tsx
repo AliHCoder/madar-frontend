@@ -7,21 +7,25 @@ import toast from "react-hot-toast";
 
 interface Props {
   articleId: string;
+  initialComments?: Comment[];
 }
 
-export default function CommentSection({ articleId }: Props) {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function CommentSection({ articleId, initialComments = [] }: Props) {
+  const [comments, setComments] = useState<Comment[]>(initialComments);
+  const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
     commentApi
       .getByArticle(articleId)
-      .then(setComments)
+      .then((data) => { if (!cancelled) setComments(data); })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [articleId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,7 +33,10 @@ export default function CommentSection({ articleId }: Props) {
     if (!name.trim() || !body.trim()) return;
     setSubmitting(true);
     try {
-      await commentApi.create(articleId, name.trim(), body.trim());
+      const newComment = await commentApi.create(articleId, name.trim(), body.trim());
+      if (newComment) {
+        setComments((prev) => [newComment, ...prev]);
+      }
       toast.success("دیدگاه شما با موفقیت ثبت شد و پس از تایید نمایش داده می‌شود.");
       setName("");
       setBody("");
@@ -116,6 +123,11 @@ export default function CommentSection({ articleId }: Props) {
                     day: "numeric",
                   })}
                 </span>
+                {!comment.isApproved && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 font-medium whitespace-nowrap">
+                    در انتظار تایید
+                  </span>
+                )}
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                 {comment.body}
