@@ -50,7 +50,7 @@ api.interceptors.response.use(
   (error: AxiosError) => Promise.reject(error),
 );
 
-const BACKEND_URL = "http://localhost:3001";
+const BACKEND_URL = API_URL.replace(/\/api$/, "");
 
 const getFullImageUrl = (url?: string | null) => {
   if (!url || typeof url !== "string" || url.trim() === "") {
