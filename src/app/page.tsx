@@ -32,50 +32,55 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  const fetchInitial = async () => {
-    try {
+  // ---------- فچ کردن دیتا (هر API مستقلاً) ----------
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchAll = async () => {
       setLoading(true);
       setError(null);
 
-      const [latest, breaking, liveStreams, hero] = await Promise.allSettled([
-        newsApi.getLatest(1, 10),
-        newsApi.getBreaking(),
-        liveApi.getActive(),
-        heroApi.getSettings(),
-      ]);
+      let anySuccess = false;
 
-      if (hero.status === "fulfilled") setHeroSettings(hero.value);
+      const safeSet = <T,>(key: string, value: T) => {
+        if (cancelled) return;
+        anySuccess = true;
+        setData((prev) => ({ ...prev, [key]: value }));
+      };
 
-      setData((prev) => ({
-        ...prev,
-        latest:
-          latest.status === "fulfilled"
-            ? latest.value
-            : { data: [], total: 0 },
-        breaking: breaking.status === "fulfilled" ? breaking.value : [],
-        liveStreams:
-          liveStreams.status === "fulfilled" ? liveStreams.value : [],
-      }));
+      newsApi.getLatest(1, 10).then(
+        (res) => safeSet("latest", res),
+        () => safeSet("latest", { data: [], total: 0 }),
+      );
 
-      // If ALL initial APIs failed, set error
-      const allFailed =
-        latest.status !== "fulfilled" &&
-        breaking.status !== "fulfilled" &&
-        liveStreams.status !== "fulfilled" &&
-        hero.status !== "fulfilled";
-      if (allFailed) {
-        setError("خطا در بارگذاری داده‌ها");
-      }
-    } catch (err: any) {
-      setError(err?.message || "خطا در بارگذاری داده‌ها");
-    } finally {
+      newsApi.getBreaking().then(
+        (res) => safeSet("breaking", res),
+        () => {},
+      );
+
+      liveApi.getActive().then(
+        (res) => safeSet("liveStreams", res),
+        () => safeSet("liveStreams", []),
+      );
+
+      heroApi.getSettings().then(
+        (res) => {
+          if (!cancelled) setHeroSettings(res);
+        },
+        () => {},
+      );
+
+      // حداکثر ۱۲ ثانیه صبر کن بعد لودینگ رو بردار
+      await new Promise((r) => setTimeout(r, 12000));
+      if (cancelled) return;
+
+      if (!anySuccess) setError("خطا در بارگذاری داده‌ها");
       setLoading(false);
-    }
-  };
+    };
 
-  // ---------- اولین fetch: مقالات اخیر + پخش زنده ----------
-  useEffect(() => {
-    fetchInitial();
+    fetchAll();
+
+    return () => { cancelled = true; };
   }, [retryCount]);
 
   // ---------- بارگذاری آرشیو (بعد از اولین رندر) ----------
