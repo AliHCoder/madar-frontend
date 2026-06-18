@@ -23,6 +23,7 @@ import {
   Mail,
 } from "lucide-react";
 import { useTheme } from "@/providers/ThemeProvider";
+import { socialApi, SocialLink } from "@/lib/api";
 
 const navLinks = [
   { label: "صفحه نخست", href: "/", icon: Home },
@@ -39,47 +40,15 @@ const footerLinks = [
   { label: "ارتباط با ما", href: "/contact", icon: Mail },
 ];
 
-const socialLinks = [
-  {
-    name: "ایتا",
-    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/eita.svg",
-    href: "#",
-  },
-  {
-    name: "بله",
-    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/bale.svg",
-    href: "#",
-  },
-  {
-    name: "آپارات",
-    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/aparat.svg",
-    href: "#",
-  },
-  {
-    name: "شاد",
-    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/shad.svg",
-    href: "#",
-  },
-  {
-    name: "روبیکا",
-    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/roobika.svg",
-    href: "#",
-  },
-  {
-    name: "یوتیوب",
-    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/yt.svg",
-    href: "#",
-  },
-  {
-    name: "تلگرام",
-    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/telegram.svg",
-    href: "#",
-  },
-  {
-    name: "اینستاگرام",
-    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/instagram.svg",
-    href: "#",
-  },
+const DEFAULT_SOCIALS: SocialLink[] = [
+  { name: "ایتا", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/eita.svg", url: "#", isActive: true, order: 0, id: "" },
+  { name: "بله", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/bale.svg", url: "#", isActive: true, order: 0, id: "" },
+  { name: "آپارات", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/aparat.svg", url: "#", isActive: true, order: 0, id: "" },
+  { name: "شاد", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/shad.svg", url: "#", isActive: true, order: 0, id: "" },
+  { name: "روبیکا", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/roobika.svg", url: "#", isActive: true, order: 0, id: "" },
+  { name: "یوتیوب", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/yt.svg", url: "#", isActive: true, order: 0, id: "" },
+  { name: "تلگرام", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/telegram.svg", url: "#", isActive: true, order: 0, id: "" },
+  { name: "اینستاگرام", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/instagram.svg", url: "#", isActive: true, order: 0, id: "" },
 ];
 
 export default function Header() {
@@ -96,6 +65,11 @@ export default function Header() {
   const [activeLink, setActiveLink] = useState(pathname); // ★ شروع با مسیر فعلی
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [socialLinks, setSocialLinks] = useState(DEFAULT_SOCIALS);
+
+  useEffect(() => {
+    socialApi.getActive().then(setSocialLinks).catch(() => setSocialLinks(DEFAULT_SOCIALS));
+  }, []);
 
   // ★ آپدیت activeLink وقتی pathname تغییر کنه
   useEffect(() => {
@@ -376,9 +350,8 @@ export default function Header() {
                 {socialLinks.map((social) => (
                   <a
                     key={social.name}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={social.url || "#"}
+                    {...(social.url && social.url !== "#" ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                     className="flex items-center justify-center p-2  rounded-lg transition-all
                       hover:bg-gray-50 dark:hover:bg-gray-800 group"
                     title={social.name}
@@ -518,9 +491,8 @@ export default function Header() {
                 {socialLinks.map((social) => (
                   <a
                     key={social.name}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={social.url || "#"}
+                    {...(social.url && social.url !== "#" ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                     className="flex items-center justify-center p-2 rounded-lg transition-all
                       hover:bg-gray-50 dark:hover:bg-gray-800 group"
                     title={social.name}

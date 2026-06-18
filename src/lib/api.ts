@@ -89,6 +89,25 @@ const normalizeTags = (tags: any): string[] => {
   return [];
 };
 
+const normalizeHighlights = (highlights: any): string[] => {
+  if (!highlights) return [];
+  if (Array.isArray(highlights)) {
+    return highlights.map((h: any) => {
+      if (typeof h === "string" && (h.startsWith("[") || h.startsWith('"'))) {
+        try { return JSON.parse(h); } catch {}
+      }
+      return h;
+    }).flat().filter(Boolean);
+  }
+  if (typeof highlights === "string") {
+    if (highlights.startsWith("[")) {
+      try { return normalizeHighlights(JSON.parse(highlights)); } catch {}
+    }
+    return [highlights];
+  }
+  return [];
+};
+
 const normalizeId = (item: any) => {
   if (!item || typeof item !== "object") return item;
   return {
@@ -99,6 +118,7 @@ const normalizeId = (item: any) => {
     thumbnail: getFullImageUrl(item.thumbnail),
     videoUrl: getFullImageUrl(item.videoUrl),
     streamUrl: getFullImageUrl(item.streamUrl),
+    highlights: normalizeHighlights(item.highlights),
   };
 };
 
@@ -329,6 +349,23 @@ export const heroApi = {
       }));
     }
     return data;
+  },
+};
+
+export interface SocialLink {
+  _id?: string;
+  id: string;
+  name: string;
+  url: string;
+  icon: string;
+  order: number;
+  isActive: boolean;
+}
+
+export const socialApi = {
+  getActive: async (): Promise<SocialLink[]> => {
+    const { data } = await api.get("/social/active");
+    return (Array.isArray(data) ? data : []).map((s: any) => ({ ...s, id: s._id || s.id }));
   },
 };
 

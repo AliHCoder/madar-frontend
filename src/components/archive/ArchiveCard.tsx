@@ -58,6 +58,7 @@ export default function ArchiveCard({
               {stream.description}
             </p>
             <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-800 pt-3">
+              {stream.showRecordedAt !== false && (
               <span className="flex items-center gap-1">
                 <Clock size={12} className="text-red-500" />
                 {new Date(stream.recordedAt).toLocaleDateString("fa-IR", {
@@ -66,6 +67,7 @@ export default function ArchiveCard({
                   day: "numeric",
                 })}
               </span>
+              )}
             </div>
           </div>
         </Link>

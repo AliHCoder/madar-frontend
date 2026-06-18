@@ -77,6 +77,8 @@ export interface ArchivedStream {
   embedUrl?: string;
   quality?: "720p" | "1080p" | "4K";
   highlights?: string[];
+  showHighlights?: boolean;
+  showRecordedAt?: boolean;
   averageRating?: number;
   ratingCount?: number;
 }
