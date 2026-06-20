@@ -1,4 +1,4 @@
-export const revalidate = 10;
+export const revalidate = 60;
 
 // app/article/[id]/page.tsx
 import { MyImage } from "@/components/ui/MyImage";

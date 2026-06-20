@@ -1,4 +1,4 @@
-export const revalidate = 5;
+export const revalidate = 15;
 
 // app/live/page.tsx
 import LiveCard from "@/components/live/LiveCard";

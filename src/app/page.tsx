@@ -1,4 +1,4 @@
-export const revalidate = 5;
+export const revalidate = 30;
 
 import HeroSection from "@/components/news/HeroSection";
 import Link from "next/link";

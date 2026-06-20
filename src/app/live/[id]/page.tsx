@@ -1,4 +1,4 @@
-export const revalidate = 5;
+export const revalidate = 30;
 
 import { notFound } from "next/navigation";
 import StreamPlayer from "@/components/stream/StreamPlayer";

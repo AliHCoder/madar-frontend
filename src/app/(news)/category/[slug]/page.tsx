@@ -1,4 +1,4 @@
-export const revalidate = 10;
+export const revalidate = 30;
 
 // app/category/[slug]/page.tsx
 import { newsApi, liveApi, archiveApi } from "@/lib/api";
