@@ -39,13 +39,13 @@ export default function NotFound() {
         <div
           className="w-12 h-12 rounded-xl flex items-center justify-center"
           style={{
-            background: "linear-gradient(135deg, #dc2626, #991b1b)",
-            boxShadow: "0 4px 12px rgba(220,38,38,0.3)",
+            background: "linear-gradient(135deg, #1099a6, #0d7a85)",
+            boxShadow: "0 4px 12px rgba(16,153,166,0.3)",
           }}
         >
           <span className="text-white font-black text-lg">م</span>
         </div>
-        <span className="text-3xl font-black text-gray-900 dark:text-white">
+        <span className="text-3xl font-black text-gray-900">
           مدار
         </span>
       </div>
@@ -55,7 +55,7 @@ export default function NotFound() {
         className="nf-num text-9xl font-black text-transparent select-none"
         style={{
           WebkitTextStroke: "3px rgb(220,38,38)",
-          textShadow: "0 0 40px rgba(220,38,38,0.15)",
+          textShadow: "0 0 40px rgba(16,153,166,0.15)",
         }}
       >
         ۴۰۴
@@ -63,7 +63,7 @@ export default function NotFound() {
 
       {/* متن */}
       <div className="nf-text space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">صفحه پیدا نشد</h2>
+        <h2 className="text-2xl font-bold text-gray-900">صفحه پیدا نشد</h2>
         <p className="text-gray-400 text-sm">
           صفحه‌ای که دنبالش می‌گشتی در مدار وجود ندارد یا حذف شده.
         </p>

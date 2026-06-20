@@ -23,14 +23,14 @@ export default function CategoryBadge({
       <span
         className={`inline-flex items-center gap-1 rounded-full font-bold border-2 ${sizeClasses[size]}`}
         style={{
-          color: category.color,
-          borderColor: category.color,
-          backgroundColor: `${category.color}08`,
+          color: "#1099a6",
+          borderColor: "#1099a6",
+          backgroundColor: `${"#1099a6"}08`,
         }}
       >
         <span
           className="w-1.5 h-1.5 rounded-full"
-          style={{ backgroundColor: category.color }}
+          style={{ backgroundColor: "#1099a6" }}
         />
         {category.name}
       </span>
@@ -42,8 +42,8 @@ export default function CategoryBadge({
       <span
         className={`inline-flex items-center gap-1 rounded-full font-bold text-white backdrop-blur-md ${sizeClasses[size]}`}
         style={{
-          backgroundColor: `${category.color}40`,
-          border: `1px solid ${category.color}60`,
+          backgroundColor: `${"#1099a6"}40`,
+          border: `1px solid ${"#1099a6"}60`,
         }}
       >
         {category.name}
@@ -56,8 +56,8 @@ export default function CategoryBadge({
     <span
       className={`inline-flex items-center gap-1 rounded-full font-bold text-white ${sizeClasses[size]}`}
       style={{
-        backgroundColor: category.color,
-        boxShadow: `0 4px 12px ${category.color}40`,
+        backgroundColor: "#1099a6",
+        boxShadow: `0 4px 12px ${"#1099a6"}40`,
       }}
     >
       <span

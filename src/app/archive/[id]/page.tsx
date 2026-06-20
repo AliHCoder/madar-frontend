@@ -1,11 +1,11 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 // app/archive/[id]/page.tsx
 import { notFound } from "next/navigation";
 import { archiveApi } from "@/lib/api";
 import StreamPlayer from "@/components/stream/StreamPlayer";
 import CategoryBadge from "@/components/common/CategoryBadge";
-import { Calendar, Clock, Eye, Play, Tag } from "lucide-react";
+import { Calendar, Clock, Eye, Tag } from "lucide-react";
 import Link from "next/link";
 
 export default async function ArchiveDetailPage(props: {
@@ -31,7 +31,7 @@ export default async function ArchiveDetailPage(props: {
       <div className="text-center">
         <Link
           href="/archive"
-          className="inline-flex items-center gap-2 text-gray-500 hover:text-red-600 transition-colors"
+          className="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-teal-600 transition-colors"
         >
           ← بازگشت به آرشیو
         </Link>

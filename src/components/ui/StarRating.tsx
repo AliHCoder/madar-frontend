@@ -45,14 +45,14 @@ export default function StarRating({
                   ? "fill-yellow-400 text-yellow-400"
                   : rating >= star - 0.5
                     ? "fill-yellow-400/50 text-yellow-400"
-                    : "fill-gray-200 text-gray-200 dark:fill-gray-700 dark:text-gray-700"
+                    : "fill-gray-200 text-gray-200"
               }`}
             />
           </button>
         ))}
       </div>
       {count > 0 && (
-        <span className="text-xs text-gray-500 dark:text-gray-400">
+        <span className="text-xs text-gray-500">
           {rating.toFixed(1)} ({count.toLocaleString("fa-IR")})
         </span>
       )}

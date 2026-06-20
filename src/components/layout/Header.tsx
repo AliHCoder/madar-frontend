@@ -8,7 +8,6 @@ import {
   Search,
   Menu,
   X,
-  Zap,
   Home,
   Radio,
   ChevronRight,
@@ -41,14 +40,70 @@ const footerLinks = [
 ];
 
 const DEFAULT_SOCIALS: SocialLink[] = [
-  { name: "ایتا", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/eita.svg", url: "#", isActive: true, order: 0, id: "" },
-  { name: "بله", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/bale.svg", url: "#", isActive: true, order: 0, id: "" },
-  { name: "آپارات", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/aparat.svg", url: "#", isActive: true, order: 0, id: "" },
-  { name: "شاد", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/shad.svg", url: "#", isActive: true, order: 0, id: "" },
-  { name: "روبیکا", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/roobika.svg", url: "#", isActive: true, order: 0, id: "" },
-  { name: "یوتیوب", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/yt.svg", url: "#", isActive: true, order: 0, id: "" },
-  { name: "تلگرام", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/telegram.svg", url: "#", isActive: true, order: 0, id: "" },
-  { name: "اینستاگرام", icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/instagram.svg", url: "#", isActive: true, order: 0, id: "" },
+  {
+    name: "ایتا",
+    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/eita.svg",
+    url: "#",
+    isActive: true,
+    order: 0,
+    id: "",
+  },
+  {
+    name: "بله",
+    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/bale.svg",
+    url: "#",
+    isActive: true,
+    order: 0,
+    id: "",
+  },
+  {
+    name: "آپارات",
+    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/aparat.svg",
+    url: "#",
+    isActive: true,
+    order: 0,
+    id: "",
+  },
+  {
+    name: "شاد",
+    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/shad.svg",
+    url: "#",
+    isActive: true,
+    order: 0,
+    id: "",
+  },
+  {
+    name: "روبیکا",
+    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/roobika.svg",
+    url: "#",
+    isActive: true,
+    order: 0,
+    id: "",
+  },
+  {
+    name: "یوتیوب",
+    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/yt.svg",
+    url: "#",
+    isActive: true,
+    order: 0,
+    id: "",
+  },
+  {
+    name: "تلگرام",
+    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/telegram.svg",
+    url: "#",
+    isActive: true,
+    order: 0,
+    id: "",
+  },
+  {
+    name: "اینستاگرام",
+    icon: "https://static.ketab.tv/ketab-tv-static/front/images/svg/instagram.svg",
+    url: "#",
+    isActive: true,
+    order: 0,
+    id: "",
+  },
 ];
 
 export default function Header() {
@@ -62,16 +117,18 @@ export default function Header() {
   const overlayRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [activeLink, setActiveLink] = useState(pathname); // ★ شروع با مسیر فعلی
+  const [activeLink, setActiveLink] = useState(pathname);
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [socialLinks, setSocialLinks] = useState(DEFAULT_SOCIALS);
 
   useEffect(() => {
-    socialApi.getActive().then(setSocialLinks).catch(() => setSocialLinks(DEFAULT_SOCIALS));
+    socialApi
+      .getActive()
+      .then(setSocialLinks)
+      .catch(() => setSocialLinks(DEFAULT_SOCIALS));
   }, []);
 
-  // ★ آپدیت activeLink وقتی pathname تغییر کنه
   useEffect(() => {
     setActiveLink(pathname);
   }, [pathname]);
@@ -120,7 +177,6 @@ export default function Header() {
 
   const headerHeight = scrolled ? 64 : 80;
 
-  // ★ تابع تشخیص active بودن لینک (برای مسیرهای nested مثل /live/123)
   const isActiveLink = (href: string) => {
     if (href === "/") {
       return pathname === "/";
@@ -130,7 +186,6 @@ export default function Header() {
 
   return (
     <>
-      {/* نوار بالا - لوگو و سرچ */}
       <div
         ref={headerRef}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -143,7 +198,6 @@ export default function Header() {
             : "0 2px 10px rgba(0,0,0,0.05)",
         }}
       >
-        {/* پس‌زمینه با dark: */}
         <div
           className="absolute inset-0 bg-white/95 dark:bg-gray-900/95 border-b border-black/5 dark:border-white/10"
           style={{
@@ -152,9 +206,7 @@ export default function Header() {
         />
 
         <div className="relative max-w-7xl mx-3 pl-4 flex items-center gap-4">
-          {/* لوگو و دکمه جمع/باز کردن */}
           <div className="flex items-center gap-3 flex-shrink-0">
-            {/* دکمه جمع/باز کردن سایدبار - فقط دسکتاپ */}
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               className="hidden lg:flex p-2 rounded-lg transition-colors items-center justify-center
@@ -168,28 +220,28 @@ export default function Header() {
               )}
             </button>
             <Link href="/" className="flex items-center gap-2 group">
-              <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center relative overflow-hidden"
-                style={{
-                  background: "linear-gradient(135deg, #dc2626, #991b1b)",
-                  boxShadow: "0 4px 12px rgba(220,38,38,0.3)",
-                }}
-              >
-                <Zap size={20} className="text-white" fill="white" />
+              <div className="relative w-10 h-10 flex-shrink-0 sm:hidden">
+                <Image
+                  src="/images/logo - only - 1000p.png"
+                  alt="مدار"
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-contain"
+                />
               </div>
 
-              <div className="hidden sm:flex flex-col leading-none text-right">
-                <span className="text-2xl font-black text-gray-900 dark:text-white">
-                  مدار
-                </span>
-                <span className="text-[9px] font-medium tracking-widest text-black dark:text-gray-300">
-                  NEWS AGENCY
-                </span>
+              <div className="hidden sm:block relative h-10">
+                <Image
+                  src="/images/logo - 1000-2600 p.png"
+                  alt="مدار"
+                  width={160}
+                  height={40}
+                  className="h-full w-auto object-contain"
+                />
               </div>
             </Link>
           </div>
 
-          {/* نوار جستجو */}
           <div className="flex-1 max-w-2xl">
             <div className="relative">
               <Search
@@ -203,7 +255,9 @@ export default function Header() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && searchQuery.trim()) {
-                    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                    router.push(
+                      `/search?q=${encodeURIComponent(searchQuery.trim())}`,
+                    );
                   }
                 }}
                 className="w-full pr-12 pl-4 py-3 rounded-xl border transition-all text-sm
@@ -211,13 +265,12 @@ export default function Header() {
                   border-gray-200 dark:border-gray-700 
                   text-gray-900 dark:text-white 
                   placeholder-gray-400 dark:placeholder-gray-400
-                  focus:border-red-500 focus:ring-red-500/20
+                  focus:border-[#1099a6] focus:ring-[#1099a6]/20
                   focus:outline-none focus:ring-2"
               />
             </div>
           </div>
 
-          {/* دکمه منو موبایل */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="lg:hidden p-2.5 rounded-lg transition-colors flex-shrink-0
@@ -228,12 +281,11 @@ export default function Header() {
         </div>
       </div>
 
-      {/* فاصله برای محتوا */}
       <div style={{ height: `${headerHeight}px` }} />
 
-      {/* Sidebar راست - دسکتاپ */}
       <aside
-        className="hidden lg:block fixed right-0 z-40
+        className="hidden lg:block fixed right-0 z-40 ov
+erflow-y-auto
           bg-white/98 dark:bg-gray-900/98
           border-l border-black/5 dark:border-white/10"
         style={{
@@ -248,11 +300,10 @@ export default function Header() {
         }}
       >
         <div className="flex flex-col ">
-          {/* لینک‌های منو */}
           <nav className="flex-1 overflow-y-auto py-4">
             {navLinks.map((link) => {
               const Icon = link.icon;
-              const isActive = isActiveLink(link.href); // ★ استفاده از تابع جدید
+              const isActive = isActiveLink(link.href);
 
               return (
                 <Link
@@ -261,7 +312,7 @@ export default function Header() {
                   onClick={() => setActiveLink(link.href)}
                   className={`flex items-center gap-3 px-4 py-3 mx-3 rounded-xl transition-all duration-200 group ${
                     isActive
-                      ? "bg-[#F05A28]/20 text-black dark:text-white"
+                      ? "bg-[#1099a6]/20 text-black dark:text-white"
                       : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                   }`}
                   title={sidebarCollapsed ? link.label : undefined}
@@ -270,25 +321,24 @@ export default function Header() {
                     size={22}
                     className={`flex-shrink-0 ${
                       isActive
-                        ? "text-[#F05A28]"
-                        : "text-[#F05A28]/50 group-hover:text-[#F05A28]"
+                        ? "text-[#1099a6]"
+                        : "text-[#1099a6]/50 group-hover:text-[#1099a6]"
                     }`}
                   />
                   {!sidebarCollapsed && (
                     <span className="font-medium text-sm">{link.label}</span>
                   )}
                   {isActive && !sidebarCollapsed && (
-                    <span className="mr-auto w-1.5 h-1.5 rounded-full bg-[#F05A28]" />
+                    <span className="mr-auto w-1.5 h-1.5 rounded-full bg-[#1099a6]" />
                   )}
                 </Link>
               );
             })}
           </nav>
 
-          {/* فوتر با خط نارنجی */}
           <div className="border-t border-gray-200 dark:border-gray-700">
             <div
-              className="h-0.5 bg-gradient-to-l from-[#F05A28] to-transparent"
+              className="h-0.5 bg-gradient-to-l from-[#1099a6] to-transparent"
               style={{ width: "100%" }}
             />
             <div className="py-4 px-3 space-y-1">
@@ -303,9 +353,9 @@ export default function Header() {
                       title={isDark ? "حالت روز" : "حالت شب"}
                     >
                       {isDark ? (
-                        <Sun size={22} className="text-[#F05A28]" />
+                        <Sun size={22} className="text-[#1099a6]" />
                       ) : (
-                        <Moon size={22} className="text-[#F05A28]" />
+                        <Moon size={22} className="text-[#1099a6]" />
                       )}
                       {!sidebarCollapsed && (
                         <span>{isDark ? "حالت روز" : "حالت شب"}</span>
@@ -326,7 +376,7 @@ export default function Header() {
                     {Icon && (
                       <Icon
                         size={22}
-                        className="text-[#F05A28] flex-shrink-0"
+                        className="text-[#1099a6] flex-shrink-0"
                       />
                     )}
                     {!sidebarCollapsed && <span>{link.label}</span>}
@@ -335,10 +385,9 @@ export default function Header() {
               })}
             </div>
             <div
-              className="h-0.5 bg-gradient-to-l from-[#F05A28] to-transparent"
+              className="h-0.5 bg-gradient-to-l from-[#1099a6] to-transparent"
               style={{ width: "100%" }}
             />
-            {/* ایکون‌های شبکه‌های اجتماعی */}
             <div className="px-4 p-4 ">
               <div
                 className={`grid gap-2 ${
@@ -351,7 +400,9 @@ export default function Header() {
                   <a
                     key={social.name}
                     href={social.url || "#"}
-                    {...(social.url && social.url !== "#" ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    {...(social.url && social.url !== "#"
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
                     className="flex items-center justify-center p-2  rounded-lg transition-all
                       hover:bg-gray-50 dark:hover:bg-gray-800 group"
                     title={social.name}
@@ -372,7 +423,6 @@ export default function Header() {
         </div>
       </aside>
 
-      {/* Overlay موبایل */}
       <div
         ref={overlayRef}
         className="lg:hidden fixed inset-0 bg-black/50 z-40 opacity-0 pointer-events-none"
@@ -380,7 +430,6 @@ export default function Header() {
         onClick={() => setMenuOpen(false)}
       />
 
-      {/* Sidebar موبایل */}
       <aside
         ref={sidebarRef}
         className="lg:hidden fixed top-0 right-0 h-full z-50 translate-x-full w-[280px]
@@ -410,7 +459,7 @@ export default function Header() {
           <nav className="flex-1 overflow-y-auto py-4">
             {navLinks.map((link) => {
               const Icon = link.icon;
-              const isActive = isActiveLink(link.href); // ★ استفاده از تابع جدید
+              const isActive = isActiveLink(link.href);
 
               return (
                 <Link
@@ -422,7 +471,7 @@ export default function Header() {
                   }}
                   className={`flex items-center gap-3 px-4 py-3 mx-2 rounded-xl transition-all duration-200 group ${
                     isActive
-                      ? "bg-[#F05A28]/20 text-black dark:text-white"
+                      ? "bg-[#1099a6]/20 text-black dark:text-white"
                       : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                   }`}
                 >
@@ -430,23 +479,22 @@ export default function Header() {
                     size={22}
                     className={`flex-shrink-0 ${
                       isActive
-                        ? "text-[#F05A28]"
+                        ? "text-[#1099a6]"
                         : "text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300"
                     }`}
                   />
                   <span className="font-medium text-sm">{link.label}</span>
                   {isActive && (
-                    <span className="mr-auto w-1.5 h-1.5 rounded-full bg-[#F05A28]" />
+                    <span className="mr-auto w-1.5 h-1.5 rounded-full bg-[#1099a6]" />
                   )}
                 </Link>
               );
             })}
           </nav>
 
-          {/* فوتر موبایل */}
           <div className="border-t border-gray-200 dark:border-gray-700">
             <div
-              className="h-0.5 bg-gradient-to-l from-[#F05A28] to-transparent"
+              className="h-0.5 bg-gradient-to-l from-[#1099a6] to-transparent"
               style={{ width: "100%" }}
             />
             <div className="py-4 px-2 space-y-1">
@@ -460,9 +508,9 @@ export default function Header() {
                         text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
                       {isDark ? (
-                        <Sun size={22} className="text-[#F05A28]" />
+                        <Sun size={22} className="text-[#1099a6]" />
                       ) : (
-                        <Moon size={22} className="text-[#F05A28]" />
+                        <Moon size={22} className="text-[#1099a6]" />
                       )}
                       <span>{isDark ? "حالت روز" : "حالت شب"}</span>
                     </button>
@@ -478,21 +526,22 @@ export default function Header() {
                     className="flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm
                       text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
-                    {Icon && <Icon size={22} className="text-[#F05A28]" />}
+                    {Icon && <Icon size={22} className="text-[#1099a6]" />}
                     <span>{link.label}</span>
                   </Link>
                 );
               })}
             </div>
 
-            {/* ایکون‌های شبکه‌های اجتماعی موبایل */}
             <div className="px-2 pb-4">
               <div className="grid grid-cols-4 gap-2">
                 {socialLinks.map((social) => (
                   <a
                     key={social.name}
                     href={social.url || "#"}
-                    {...(social.url && social.url !== "#" ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    {...(social.url && social.url !== "#"
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
                     className="flex items-center justify-center p-2 rounded-lg transition-all
                       hover:bg-gray-50 dark:hover:bg-gray-800 group"
                     title={social.name}

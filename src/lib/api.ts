@@ -232,6 +232,14 @@ export const archiveApi = {
     });
   },
 
+  getByCategory: async (slug: string, page = 1, limit = 10): Promise<ApiResponse<ArchivedStream[]>> => {
+    return axiosRetry(async () => {
+      const { data } = await api.get(`/archive?category=${slug}&page=${page}&limit=${limit}`);
+      if (data.data) data.data = normalizeArray(data.data);
+      return data;
+    });
+  },
+
   getById: async (id: string): Promise<ArchivedStream> => {
     return axiosRetry(async () => {
       const { data } = await api.get(`/archive/${id}`);
@@ -254,6 +262,14 @@ export const categoryApi = {
   getAll: async (): Promise<Category[]> => {
     return axiosRetry(async () => {
       const { data } = await api.get("/categories");
+      const list = Array.isArray(data) ? data : data.data || [];
+      return normalizeArray(list);
+    });
+  },
+
+  getHomepage: async (): Promise<Category[]> => {
+    return axiosRetry(async () => {
+      const { data } = await api.get("/categories/homepage");
       const list = Array.isArray(data) ? data : data.data || [];
       return normalizeArray(list);
     });

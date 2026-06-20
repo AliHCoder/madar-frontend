@@ -70,7 +70,7 @@ export default function HeroSection({
                 {banner.title}
               </h3>
             </div>
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-500 to-transparent" />
           </Link>
         ))}
       </div>
@@ -95,7 +95,7 @@ export default function HeroSection({
                 {banner.title}
               </h3>
             </div>
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-500 to-transparent" />
           </Link>
         ))}
       </div>
@@ -134,7 +134,7 @@ export default function HeroSection({
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-red-900/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-teal-900/30 to-transparent" />
 
           <button
             onClick={prevSlide}
@@ -161,24 +161,24 @@ export default function HeroSection({
                   width: i === currentSlide ? "20px" : "6px",
                   height: "6px",
                   borderRadius: "3px",
-                  background: i === currentSlide ? "#FF5722" : "rgba(255,255,255,0.4)",
+                  background: i === currentSlide ? "#1099a6" : "rgba(255,255,255,0.4)",
                 }}
               />
             ))}
           </div>
 
           <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 lg:p-8">
-            <p className="text-gray-300 text-xs sm:text-sm mb-1 sm:mb-2 font-medium">
+            <p className="text-gray-300 dark:text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2 font-medium">
               {active.author}
             </p>
             <Link href={active.link}>
-              <h2 className="text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl text-right font-black leading-tight mb-2 sm:mb-4 max-w-2xl hover:text-orange-300 transition-colors duration-300 cursor-pointer">
+              <h2 className="text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl text-right font-black leading-tight mb-2 sm:mb-4 max-w-2xl hover:text-teal-300 transition-colors duration-300 cursor-pointer">
                 {active.title}
               </h2>
             </Link>
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-teal-600 to-transparent" />
         </div>
       </div>
 

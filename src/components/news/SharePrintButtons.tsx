@@ -62,8 +62,8 @@ export default function SharePrintButtons({ title, url }: Props) {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-gray-100 dark:border-gray-800">
-      <span className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-2 flex items-center gap-1">
+    <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-gray-100">
+      <span className="text-xs font-bold text-gray-500 ml-2 flex items-center gap-1">
         <Share2 size={14} />
         اشتراک‌گذاری:
       </span>
@@ -87,18 +87,18 @@ export default function SharePrintButtons({ title, url }: Props) {
         className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110 ${
           copied
             ? "bg-green-500 text-white"
-            : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+            : "bg-gray-200 text-gray-600 hover:bg-gray-300"
         }`}
       >
         {copied ? <Check size={15} /> : <LinkIcon size={15} />}
       </button>
 
-      <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
+      <div className="w-px h-6 bg-gray-200 mx-1" />
 
       <button
         onClick={handlePrint}
         title="چاپ"
-        className="w-9 h-9 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all hover:scale-110"
+        className="w-9 h-9 bg-gray-200 rounded-xl flex items-center justify-center text-gray-600 hover:bg-gray-300 transition-all hover:scale-110"
       >
         <Printer size={15} />
       </button>

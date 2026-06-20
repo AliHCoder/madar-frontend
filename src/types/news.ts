@@ -11,6 +11,7 @@ export interface Category {
   parent?: string | Category | null;
   children?: Category[];
   order?: number;
+  showOnHomepage?: boolean;
 }
 
 // ─── اینترفیس مقاله خبری ─────────────────────────────────────────

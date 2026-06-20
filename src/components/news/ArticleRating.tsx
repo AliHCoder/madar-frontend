@@ -32,7 +32,7 @@ export default function ArticleRating({ articleId }: Props) {
 
   return (
     <div className="flex items-center gap-3 py-4">
-      <span className="text-sm font-bold text-gray-700 dark:text-gray-300 whitespace-nowrap">
+      <span className="text-sm font-bold text-gray-700 whitespace-nowrap">
         امتیاز به این مقاله
       </span>
       <StarRating

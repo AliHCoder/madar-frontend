@@ -7,11 +7,11 @@ import {
   Eye,
   Clock,
   Calendar,
-  Play,
   Users,
   Tag,
   Maximize2,
 } from "lucide-react";
+import PlayButton from "@/components/ui/PlayButton";
 import { LiveStream, ArchivedStream } from "@/types/news";
 import CategoryBadge from "@/components/common/CategoryBadge";
 import StarRating from "@/components/ui/StarRating";
@@ -94,7 +94,7 @@ export default function StreamPlayer({
   return (
     <div ref={playerRef} className="space-y-6">
       {/* ─── پلیر ویدیو ─── */}
-      <div className="relative rounded-2xl overflow-hidden aspect-video shadow-2xl dark:shadow-gray-900/50 bg-black">
+      <div className="relative rounded-2xl overflow-hidden aspect-video shadow-2xl bg-black">
         {/* حالت پخش نشده - نمایش thumbnail */}
         {!isPlaying && (
           <>
@@ -111,38 +111,28 @@ export default function StreamPlayer({
 
             {/* overlay gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-br from-red-900/20 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-br from-teal-900/20 via-transparent to-transparent" />
 
             {/* دکمه پخش مرکزی */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <button
+              <PlayButton
+                size={80}
                 onClick={() => setIsPlaying(true)}
-                className="group relative"
-              >
-                {/* حلقه بیرونی */}
-                <div className="absolute inset-0 w-20 h-20 rounded-full border-2 border-white/30 animate-ping" />
-                {/* دکمه اصلی */}
-                <div className="relative w-20 h-20 bg-red-600 hover:bg-red-500 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-2xl hover:shadow-red-500/50">
-                  <Play
-                    size={32}
-                    className="text-white ml-1 transition-transform group-hover:scale-110"
-                    fill="white"
-                  />
-                </div>
-              </button>
+                showPing
+              />
             </div>
 
             {/* ─── نشان لایو (فقط برای پخش زنده فعال) ─── */}
             {liveStream?.isLive && (
               <div className="absolute top-6 left-6 z-20">
                 <div className="relative">
-                  <div className="bg-red-600 text-white text-sm font-bold px-4 py-2 rounded-full flex items-center gap-2 relative z-10 backdrop-blur-sm">
+                  <div className="bg-teal-600 text-white text-sm font-bold px-4 py-2 rounded-full flex items-center gap-2 relative z-10 backdrop-blur-sm">
                     <span className="w-2.5 h-2.5 bg-white rounded-full animate-pulse" />
                     پخش زنده
                   </div>
                   <div
                     ref={pulseRef}
-                    className="absolute inset-0 bg-red-600 rounded-full opacity-70"
+                    className="absolute inset-0 bg-teal-600 rounded-full opacity-70"
                   />
                 </div>
               </div>
@@ -153,7 +143,7 @@ export default function StreamPlayer({
               !liveStream.isLive &&
               liveStream.status === "upcoming" && (
                 <div className="absolute top-6 left-6 z-20">
-                  <div className="bg-orange-500 text-white text-sm font-bold px-4 py-2 rounded-full flex items-center gap-2 backdrop-blur-sm">
+                  <div className="bg-teal-500 text-white text-sm font-bold px-4 py-2 rounded-full flex items-center gap-2 backdrop-blur-sm">
                     <Clock size={14} />
                     به زودی
                   </div>
@@ -163,7 +153,7 @@ export default function StreamPlayer({
             {/* ─── نشان ended (برای پخش‌های تمام شده) ─── */}
             {liveStream && liveStream.status === "ended" && (
               <div className="absolute top-6 left-6 z-20">
-                <div className="bg-gray-800 dark:bg-gray-700 text-white text-sm font-bold px-4 py-2 rounded-full flex items-center gap-2 backdrop-blur-sm">
+                <div className="bg-gray-800 text-white text-sm font-bold px-4 py-2 rounded-full flex items-center gap-2 backdrop-blur-sm">
                   پایان یافته
                 </div>
               </div>
@@ -173,14 +163,14 @@ export default function StreamPlayer({
             <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between z-20">
               {liveStream?.isLive && (
                 <div className="bg-black/70 backdrop-blur-md text-white text-sm font-semibold px-4 py-2 rounded-full flex items-center gap-2">
-                  <Eye size={16} className="text-red-400" />
+                  <Eye size={16} className="text-teal-400" />
                   {liveStream.viewers.toLocaleString("fa-IR")} بیننده
                 </div>
               )}
 
               {archivedStream && (
                 <div className="bg-black/70 backdrop-blur-md text-white text-sm font-semibold px-4 py-2 rounded-full flex items-center gap-2">
-                  <Clock size={16} className="text-red-400" />
+                  <Clock size={16} className="text-teal-400" />
                   {archivedStream.duration} دقیقه
                 </div>
               )}
@@ -212,11 +202,11 @@ export default function StreamPlayer({
       </div>
 
       {/* ─── اطلاعات استریم ─── */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 sm:p-8 shadow-lg dark:shadow-gray-900/50 border border-gray-100 dark:border-gray-800">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 sm:p-8 shadow-lg border border-gray-100 dark:border-gray-700">
         {/* هدر با کتگوری */}
         <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2 leading-relaxed">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 leading-relaxed">
               {stream.title}
             </h1>
             {stream.subtitle && (
@@ -224,7 +214,7 @@ export default function StreamPlayer({
                 {stream.subtitle}
               </p>
             )}
-            <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg leading-relaxed">
+            <p className="text-gray-600 dark:text-gray-300 text-base sm:text-lg leading-relaxed">
               {stream.description}
             </p>
           </div>
@@ -236,7 +226,7 @@ export default function StreamPlayer({
         {/* ─── Quality Badge (برای آرشیو) ─── */}
         {archivedStream?.quality && (
           <div className="mb-4">
-            <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
+            <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
               <Maximize2 size={12} />
               {archivedStream.quality}
             </span>
@@ -248,8 +238,8 @@ export default function StreamPlayer({
           {/* اطلاعات لایو */}
           {liveStream && (
             <>
-              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                <Calendar size={18} className="text-red-500" />
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                <Calendar size={18} className="text-teal-500" />
                 <span className="text-sm">
                   {liveStream.status === "upcoming" ? "شروع:" : "شروع:"}{" "}
                   {new Date(liveStream.startTime).toLocaleString("fa-IR", {
@@ -265,8 +255,8 @@ export default function StreamPlayer({
               {liveStream.isLive && (
                 <>
                   <div className="flex items-center gap-2">
-                    <Users size={18} className="text-red-500" />
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                    <Users size={18} className="text-teal-500" />
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                       {liveStream.viewers.toLocaleString("fa-IR")} بیننده فعال
                     </span>
                   </div>
@@ -283,8 +273,8 @@ export default function StreamPlayer({
           {/* اطلاعات آرشیو */}
           {archivedStream && (
             <>
-              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                <Calendar size={18} className="text-red-500" />
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                <Calendar size={18} className="text-teal-500" />
                 <span className="text-sm">
                   ضبط شده:{" "}
                   {new Date(archivedStream.recordedAt).toLocaleDateString(
@@ -297,8 +287,8 @@ export default function StreamPlayer({
                   )}
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                <Clock size={18} className="text-red-500" />
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                <Clock size={18} className="text-teal-500" />
                 <span className="text-sm">
                   مدت زمان: {archivedStream.duration} دقیقه
                 </span>
@@ -309,7 +299,7 @@ export default function StreamPlayer({
           {/* ─── تگ‌ها ─── */}
           {stream.category && (
             <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-              <Tag size={16} className="text-red-400" />
+              <Tag size={16} className="text-teal-400" />
               <span className="text-sm">{stream.category.slug}</span>
             </div>
           )}
@@ -336,10 +326,10 @@ export default function StreamPlayer({
           <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
             <div
               className="prose prose-lg max-w-none text-gray-700 dark:text-gray-300
-                prose-headings:text-gray-900 dark:prose-headings:text-white
-                prose-a:text-red-600 dark:prose-a:text-red-400
-                prose-strong:text-gray-900 dark:prose-strong:text-white
-                prose-blockquote:border-red-500
+                prose-headings:text-gray-900 dark:prose-headings:text-gray-100
+                prose-a:text-teal-600 dark:prose-a:text-teal-400
+                prose-strong:text-gray-900 dark:prose-strong:text-gray-100
+                prose-blockquote:border-teal-500
                 leading-loose"
               dangerouslySetInnerHTML={{ __html: stream.content }}
             />
@@ -347,9 +337,9 @@ export default function StreamPlayer({
         )}
 
         {/* ─── هایلایت‌های آرشیو ─── */}
-        {archivedStream?.highlights && archivedStream.highlights.length > 0 && (
+        {archivedStream?.showHighlights === true && archivedStream.highlights && archivedStream.highlights.length > 0 && (
           <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">
               لحظات مهم
             </h3>
             <div className="space-y-2">
@@ -357,13 +347,13 @@ export default function StreamPlayer({
                 <button
                   key={index}
                   className="w-full text-right px-4 py-2 rounded-lg 
-                    dark:bg-gray-800 
-                    hover:bg-red-50 dark:hover:bg-red-900/20 
+                    
+                    hover:bg-teal-50 dark:hover:bg-gray-700 
                     text-sm text-gray-700 dark:text-gray-300 
-                    hover:text-red-600 dark:hover:text-red-400 
+                    hover:text-teal-600 
                     transition-colors flex items-center gap-2"
                 >
-                  <Play size={14} className="text-red-500 flex-shrink-0" />
+                  <PlayButton size={20} tag="span" />
                   {highlight}
                 </button>
               ))}

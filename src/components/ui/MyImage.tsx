@@ -2,7 +2,6 @@
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
 
-const isDev = process.env.NODE_ENV === "development";
 const DEFAULT_IMAGE = "/assets/images/png/test.jpg";
 
 interface MyImageProps extends Omit<ImageProps, "src"> {
@@ -22,7 +21,7 @@ export function MyImage({ src, fallback, alt, ...props }: MyImageProps) {
       {...props}
       src={finalSrc}
       alt={alt || "تصویر"}
-      unoptimized={isDev}
+      unoptimized
       onError={() => setHasError(true)}
     />
   );

@@ -73,19 +73,19 @@ function SearchContent() {
         className="relative max-w-2xl mx-auto"
       >
         <div className="relative">
-          <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={20} />
           <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="عبارت مورد نظر را جستجو کنید..."
-            className="w-full pr-12 pl-4 py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-red-500 dark:focus:border-red-500 transition-colors text-base"
+            className="w-full pr-12 pl-4 py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-teal-500 transition-colors text-base"
           />
           {inputValue && (
             <button
               type="button"
               onClick={() => setInputValue("")}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             >
               <X size={18} />
             </button>
@@ -96,7 +96,7 @@ function SearchContent() {
       {/* Results header */}
       {query && (
         <div className="text-center space-y-1">
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">
+          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-gray-100">
             نتایج جستجو
           </h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm">
@@ -110,13 +110,13 @@ function SearchContent() {
       {/* Loading */}
       {loading && (
         <div className="flex justify-center py-16">
-          <div className="w-10 h-10 border-4 border-red-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
         </div>
       )}
 
       {/* Empty state - no query */}
       {!query && !loading && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-400 dark:text-gray-500">
           <Search size={48} className="mx-auto mb-3 opacity-50" />
           <p>عبارت مورد نظر خود را جستجو کنید</p>
         </div>
@@ -124,7 +124,7 @@ function SearchContent() {
 
       {/* Empty state - no results */}
       {query && !loading && !hasResults && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-400 dark:text-gray-500">
           <X size={48} className="mx-auto mb-3 opacity-50" />
           <p>نتیجه‌ای برای "{query}" یافت نشد</p>
         </div>
@@ -134,9 +134,9 @@ function SearchContent() {
       {newsResults && newsResults.data.length > 0 && !loading && (
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
               اخبار
-              <span className="text-gray-500 mr-2 text-sm font-normal">
+              <span className="text-gray-500 dark:text-gray-400 mr-2 text-sm font-normal">
                 ({newsResults.total})
               </span>
             </h2>
@@ -149,9 +149,9 @@ function SearchContent() {
       {archiveResults && archiveResults.data.length > 0 && !loading && (
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
               آرشیو ویدیوها
-              <span className="text-gray-500 mr-2 text-sm font-normal">
+              <span className="text-gray-500 dark:text-gray-400 mr-2 text-sm font-normal">
                 ({archiveResults.total})
               </span>
             </h2>
@@ -172,7 +172,7 @@ function SearchContent() {
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
+                    <div className="w-full h-full bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center">
                       <Archive size={32} className="text-white/80" />
                     </div>
                   )}
@@ -183,7 +183,7 @@ function SearchContent() {
                   </div>
                 </div>
                 <div className="p-3 flex flex-col flex-1">
-                  <h3 className="font-bold text-sm text-gray-900 dark:text-white line-clamp-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+                  <h3 className="font-bold text-sm text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:text-teal-600 transition-colors">
                     {item.title}
                   </h3>
                   {item.description && (
@@ -206,7 +206,7 @@ export default function SearchPage() {
     <Suspense
       fallback={
         <div className="flex justify-center py-16">
-          <div className="w-10 h-10 border-4 border-red-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >

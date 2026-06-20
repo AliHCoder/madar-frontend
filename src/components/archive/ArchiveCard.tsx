@@ -1,7 +1,8 @@
 // components/archive/ArchiveCard.tsx
 import { MyImage } from "@/components/ui/MyImage";
 import Link from "next/link";
-import { Clock, Play } from "lucide-react";
+import { Clock } from "lucide-react";
+import PlayButton from "@/components/ui/PlayButton";
 import { ArchivedStream } from "@/types/news";
 import ScrollReveal from "../animations/ScrollReveal";
 import CategoryBadge from "@/components/common/CategoryBadge";
@@ -15,9 +16,9 @@ export default function ArchiveCard({
 }) {
   return (
     <ScrollReveal delay={delay} direction="up">
-      <div className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgba(220,38,38,0.15)] transition-shadow duration-300 h-full flex flex-col">
+      <div className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-700 cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgba(16,153,166,0.15)] transition-shadow duration-300 h-full flex flex-col">
         <Link href={`/archive/${stream.id}`} className="flex-1 flex flex-col">
-          <div className="relative h-40 md:h-52 overflow-hidden">
+          <div className="relative aspect-video overflow-hidden">
             <MyImage
               src={stream.thumbnail || "/assets/images/png/test.jpg"}
               alt={stream.title}
@@ -27,9 +28,7 @@ export default function ArchiveCard({
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-16 h-16 bg-red-600/90 rounded-full flex items-center justify-center group-hover:bg-red-500 transition-colors">
-                <Play size={28} className="text-white fill-white ml-1" />
-              </div>
+              <PlayButton size={64} />
             </div>
 
             {stream.category && (
@@ -51,16 +50,16 @@ export default function ArchiveCard({
           </div>
 
           <div className="p-5 flex-1 flex flex-col justify-between">
-            <h3 className="text-gray-900 dark:text-white font-bold text-lg leading-snug mb-2 line-clamp-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors duration-200">
+            <h3 className="text-gray-900 dark:text-gray-100 font-bold text-lg leading-snug mb-2 line-clamp-2 group-hover:text-teal-600 dark:group-hover:text-[#1099a6] transition-colors duration-200">
               {stream.title}
             </h3>
             <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mb-4">
               {stream.description}
             </p>
-            <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-800 pt-3">
-              {stream.showRecordedAt !== false && (
+            <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-400 border-t border-gray-100 dark:border-gray-700 pt-3">
+              {stream.showRecordedAt === true && (
               <span className="flex items-center gap-1">
-                <Clock size={12} className="text-red-500" />
+                <Clock size={12} className="text-teal-500" />
                 {new Date(stream.recordedAt).toLocaleDateString("fa-IR", {
                   year: "numeric",
                   month: "long",
@@ -72,7 +71,7 @@ export default function ArchiveCard({
           </div>
         </Link>
 
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-red-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-600 to-teal-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
       </div>
     </ScrollReveal>
   );

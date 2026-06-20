@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Header from "@/components/layout/Header";
+import ThemeProvider from "@/providers/ThemeProvider";
 import "./globals.css";
-import { ThemeProvider } from "@/providers/ThemeProvider";
-import { ThemeScript } from "@/providers/theme-script";
 
 export const metadata: Metadata = {
   title: {
@@ -20,9 +19,17 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <head>
-        <ThemeScript />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (localStorage.getItem("theme") === "dark" || (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+                document.documentElement.classList.add("dark");
+              }
+            `,
+          }}
+        />
       </head>
-      <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 antialiased">
+      <body className="bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100 antialiased">
         <ThemeProvider>
           <Header />
           <main className=" mx-auto p-6 pb-4 lg:mr-[calc(var(--sidebar-width)+1rem)] transition-all duration-300">

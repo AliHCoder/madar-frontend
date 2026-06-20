@@ -27,12 +27,12 @@ export default async function TagPage(props: {
     <div className="space-y-10">
       <ScrollReveal direction="up">
         <div className="text-center space-y-3 py-8">
-          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto">
-            <Hash size={28} className="text-red-600 dark:text-red-400" />
+          <div className="w-16 h-16 bg-teal-100 dark:bg-teal-900/40 rounded-2xl flex items-center justify-center mx-auto">
+            <Hash size={28} className="text-teal-600 dark:text-teal-400" />
           </div>
           <TextReveal
             text={`#${tag.name}`}
-            className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white"
+            className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-gray-100"
           />
           <p className="text-gray-500 dark:text-gray-400">
             {tag.count} مقاله با این تگ
@@ -44,7 +44,7 @@ export default async function TagPage(props: {
         {articles.data && articles.data.length > 0 ? (
           <NewsGrid articles={articles.data} />
         ) : (
-          <div className="text-center py-16 text-gray-400">
+          <div className="text-center py-16 text-gray-400 dark:text-gray-500">
             <Tag size={48} className="mx-auto mb-3 opacity-50" />
             <p>هیچ مقاله‌ای با این تگ یافت نشد</p>
           </div>

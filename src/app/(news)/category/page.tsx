@@ -1,17 +1,22 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 15;
 
 // app/categories/page.tsx
-import { categoryApi, newsApi } from "@/lib/api";
+import { categoryApi, newsApi, archiveApi, liveApi } from "@/lib/api";
 import ScrollReveal from "@/components/animations/ScrollReveal";
 import NewsGrid from "@/components/news/NewsGrid";
-import { Category, Article } from "@/types/news";
+import ArchiveCard from "@/components/archive/ArchiveCard";
+import LiveCard from "@/components/live/LiveCard";
+import { Category, Article, ArchivedStream, LiveStream } from "@/types/news";
 import { LayoutGrid, ChevronLeft, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
-interface CategoryWithArticles {
+interface CategoryWithItems {
   category: Category;
   articles: Article[];
+  archives: ArchivedStream[];
+  lives: LiveStream[];
   totalArticles: number;
+  totalArchives: number;
 }
 
 export default async function CategoriesPage() {
@@ -23,37 +28,49 @@ export default async function CategoriesPage() {
     categories = [];
   }
 
-  // گرفتن مقاله‌های preview برای هر کتگوری (۶ تا برای نمایش بهتر)
-  const categoriesWithArticles: CategoryWithArticles[] = await Promise.all(
+  // گرفتن همه پخش‌های زنده برای فیلتر بر اساس کتگوری
+  let allLives: LiveStream[] = [];
+  try {
+    allLives = await liveApi.getActive();
+  } catch {}
+
+  // گرفتن مقاله‌ها، آرشیوها و پخش‌های زنده برای هر کتگوری
+  const categoriesWithItems: CategoryWithItems[] = await Promise.all(
     categories.map(async (cat) => {
+      let articles: Article[] = [];
+      let totalArticles = 0;
+      let archives: ArchivedStream[] = [];
+      let totalArchives = 0;
       try {
         const res = await newsApi.getByCategory(cat.slug, 1, 6);
-        return {
-          category: cat,
-          articles: res.data || [],
-          totalArticles: res.total || 0,
-        };
-      } catch {
-        return {
-          category: cat,
-          articles: [],
-          totalArticles: 0,
-        };
-      }
+        articles = res.data || [];
+        totalArticles = res.total || 0;
+      } catch {}
+
+      try {
+        const res = await archiveApi.getByCategory(cat.slug, 1, 4);
+        archives = (res.data || []).filter(Boolean);
+        totalArchives = res.total || 0;
+      } catch {}
+
+      const lives = allLives.filter(
+        (live) => live.category?.slug === cat.slug || live.categories?.some((c) => c.slug === cat.slug)
+      );
+
+      return { category: cat, articles, archives, lives, totalArticles, totalArchives };
     }),
   );
 
-  // فقط کتگوری‌های فعال
-  const activeCategories = categoriesWithArticles.filter(
-    (cat) => cat.totalArticles > 0,
+  const nonEmptyCategories = categoriesWithItems.filter(
+    c => c.articles.length > 0 || c.archives.length > 0 || c.lives.length > 0
   );
 
   return (
     <div className="min-h-screen">
-      <main className="max-w-7xl mx-auto px-4 pb-16 mt-8 space-y-14">
+      <div className="max-w-7xl mx-auto px-4 pb-16 mt-8 space-y-14">
         {/* ─── سکشن‌های هر دسته‌بندی ─── */}
-        {activeCategories.length > 0 ? (
-          activeCategories.map((catData, index) => (
+        {nonEmptyCategories.length > 0 ? (
+          nonEmptyCategories.map((catData, index) => (
             <ScrollReveal
               key={catData.category.id}
               direction="up"
@@ -65,7 +82,7 @@ export default async function CategoriesPage() {
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2">
                       <div>
-                        <h2 className="text-2xl font-black leading-none text-gray-900 dark:text-white">
+                        <h2 className="text-2xl font-black leading-none text-gray-900 dark:text-gray-100">
                           {catData.category.name}
                         </h2>
                       </div>
@@ -77,7 +94,7 @@ export default async function CategoriesPage() {
                       >
                         <ExternalLink
                           size={20}
-                          style={{ color: catData.category.color }}
+                          style={{ color: "#1099a6" }}
                           className="opacity-60 hover:opacity-100 transition-opacity"
                         />
                       </Link>
@@ -90,24 +107,24 @@ export default async function CategoriesPage() {
                       href={`/category/${catData.category.slug}`}
                       className="group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 hover:shadow-lg flex-shrink-0"
                       style={{
-                        backgroundColor: `${catData.category.color}10`,
-                        border: `1px solid ${catData.category.color}40`,
+                        backgroundColor: "rgba(16,153,166,0.1)",
+                        border: "1px solid rgba(16,153,166,0.4)",
                       }}
                     >
                       <span
                         className="text-xs font-bold"
-                        style={{ color: catData.category.color }}
+                        style={{ color: "#1099a6" }}
                       >
                         نمایش همه
                       </span>
                       <ChevronLeft
                         size={16}
-                        style={{ color: catData.category.color }}
+                        style={{ color: "#1099a6" }}
                         className="transition-transform group-hover:-translate-x-1"
                       />
                       <span
                         className="text-xs opacity-70"
-                        style={{ color: catData.category.color }}
+                        style={{ color: "#1099a6" }}
                       >
                         {catData.totalArticles.toLocaleString("fa-IR")}
                       </span>
@@ -119,64 +136,83 @@ export default async function CategoriesPage() {
                 <div
                   className="w-full h-px mb-8"
                   style={{
-                    background: `linear-gradient(90deg, ${catData.category.color} 0%, ${catData.category.color}30 50%, transparent 100%)`,
+                    background: "linear-gradient(90deg, #1099a6 0%, rgba(16,153,166,0.3) 50%, transparent 100%)",
                   }}
                 />
 
-                {/* استفاده از NewsGrid موجود */}
-                {catData.articles.length > 0 ? (
+                {/* پخش‌های زنده */}
+                {catData.lives.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-bold text-teal-600 dark:text-teal-400 mb-4 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
+                      پخش زنده
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {catData.lives.slice(0, 4).map((live) => (
+                        <LiveCard key={live.id} stream={live} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* مقالات */}
+                {catData.articles.length > 0 && (
                   <>
                     <NewsGrid articles={catData.articles.slice(0, 6)} />
 
-                    {/* دکمه نمایش همه در پایین (برای موبایل) */}
                     {catData.totalArticles > 6 && (
                       <div className="mt-6 text-center lg:hidden">
                         <Link
                           href={`/category/${catData.category.slug}`}
                           className="inline-flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300 hover:shadow-lg"
                           style={{
-                            backgroundColor: `${catData.category.color}10`,
-                            border: `1px solid ${catData.category.color}40`,
+                            backgroundColor: "rgba(16,153,166,0.1)",
+                            border: "1px solid rgba(16,153,166,0.4)",
                           }}
                         >
                           <span
                             className="text-sm font-bold"
-                            style={{ color: catData.category.color }}
+                            style={{ color: "#1099a6" }}
                           >
                             نمایش همه اخبار {catData.category.name}
                           </span>
-                          <ChevronLeft
-                            size={18}
-                            style={{ color: catData.category.color }}
-                          />
+                          <ChevronLeft size={18} style={{ color: "#1099a6" }} />
                         </Link>
                       </div>
                     )}
                   </>
-                ) : (
-                  <div
-                    className="text-center py-12 rounded-2xl"
-                    style={{ backgroundColor: `${catData.category.color}05` }}
-                  >
-                    <p className="text-gray-400 dark:text-gray-500 text-sm">
-                      هنوز خبری در این دسته‌بندی منتشر نشده است
-                    </p>
+                )}
+
+                {/* آرشیوها */}
+                {catData.archives.length > 0 && (
+                  <div className="mt-6">
+                    {catData.articles.length > 0 && (
+                      <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-4">
+                        آرشیوهای {catData.category.name}
+                      </h3>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {catData.archives.slice(0, 4).map((archive) => (
+                        <ArchiveCard key={archive.id} stream={archive} />
+                      ))}
+                    </div>
                   </div>
                 )}
+
               </section>
             </ScrollReveal>
           ))
         ) : (
           <div className="text-center py-20">
-            <div className="w-20 h-20 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
+            <div className="w-20 h-20 rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
               <span className="text-3xl">📭</span>
             </div>
             <p className="text-gray-400 dark:text-gray-500 text-lg">
-              هیچ دسته‌بندی فعالی یافت نشد
+              هیچ دسته‌بندی یافت نشد
             </p>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

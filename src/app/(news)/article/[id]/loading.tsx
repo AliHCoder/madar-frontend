@@ -9,7 +9,7 @@ export default function ArticleLoading() {
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className="h-4 bg-gray-200 dark:bg-gray-800 rounded animate-pulse"
+              className="h-4 bg-gray-200 rounded animate-pulse"
               style={{ width: `${80 + Math.random() * 20}%` }}
             />
           ))}

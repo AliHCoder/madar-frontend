@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 10;
 
 // app/article/[id]/page.tsx
 import { MyImage } from "@/components/ui/MyImage";
@@ -58,7 +58,7 @@ export default async function ArticlePage(props: {
             {/* عنوان */}
             <TextReveal
               text={article.title}
-              className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white leading-tight"
+              className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-gray-100 leading-tight"
             />
 
             {/* زیرعنوان */}
@@ -74,15 +74,15 @@ export default async function ArticlePage(props: {
             </p>
 
             {/* متادیتا */}
-            <div className="flex flex-wrap items-center gap-5 text-sm text-gray-400 dark:text-gray-500 border-y border-gray-100 dark:border-gray-800 py-4">
+            <div className="flex flex-wrap items-center gap-5 text-sm text-gray-400 dark:text-gray-500 border-y border-gray-100 dark:border-gray-700 py-4">
               <span className="flex items-center gap-1.5">
-                <User size={15} className="text-red-500" />
+                <User size={15} className="text-teal-500" />
                 <span className="text-gray-700 dark:text-gray-300">
                   {article.author}
                 </span>
               </span>
               <span className="flex items-center gap-1.5">
-                <Calendar size={15} className="text-red-500" />
+                <Calendar size={15} className="text-teal-500" />
                 <span className="text-gray-700 dark:text-gray-300">
                   {new Date(article.publishedAt).toLocaleDateString("fa-IR", {
                     year: "numeric",
@@ -92,14 +92,14 @@ export default async function ArticlePage(props: {
                 </span>
               </span>
               <span className="flex items-center gap-1.5">
-                <Clock size={15} className="text-red-500" />
+                <Clock size={15} className="text-teal-500" />
                 <span className="text-gray-700 dark:text-gray-300">
                   {article.readTime} دقیقه مطالعه
                 </span>
               </span>
               {article.newsCode && (
                 <span className="flex items-center gap-1.5">
-                  <Hash size={15} className="text-red-500" />
+                  <Hash size={15} className="text-teal-500" />
                   <span className="text-gray-700 dark:text-gray-300 font-mono text-xs">
                     {article.newsCode}
                   </span>
@@ -111,7 +111,7 @@ export default async function ArticlePage(props: {
 
         {/* تصویر اصلی */}
         <ScrollReveal delay={0.1}>
-          <div className="relative h-80 md:h-[500px] rounded-3xl overflow-hidden shadow-lg dark:shadow-2xl dark:shadow-gray-900/50">
+          <div className="relative h-80 md:h-[500px] rounded-3xl overflow-hidden shadow-lg">
             <MyImage
               src={article.image || "/assets/images/png/test.jpg"}
               alt={article.title}
@@ -126,12 +126,12 @@ export default async function ArticlePage(props: {
         {/* محتوای مقاله */}
         <ScrollReveal delay={0.2}>
           <div
-            className="prose prose-lg max-w-none text-gray-700 dark:text-gray-300 
-              prose-headings:text-gray-900 dark:prose-headings:text-white
-              prose-a:text-red-600 dark:prose-a:text-red-400
-              prose-strong:text-gray-900 dark:prose-strong:text-white
-              prose-code:text-red-600 dark:prose-code:text-red-400
-              prose-blockquote:border-red-500 dark:prose-blockquote:border-red-400
+            className="prose prose-lg max-w-none text-gray-700 dark:text-gray-300
+              prose-headings:text-gray-900 dark:prose-headings:text-gray-100
+              prose-a:text-teal-600
+              prose-strong:text-gray-900 dark:prose-strong:text-gray-100
+              prose-code:text-teal-600
+              prose-blockquote:border-teal-500
               leading-loose"
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
@@ -139,7 +139,7 @@ export default async function ArticlePage(props: {
 
         {/* امتیاز */}
         <ScrollReveal delay={0.22}>
-          <div className="border-t border-gray-100 dark:border-gray-800">
+          <div className="border-t border-gray-100 dark:border-gray-700">
             <ArticleRating articleId={article.id} />
           </div>
         </ScrollReveal>
@@ -151,7 +151,7 @@ export default async function ArticlePage(props: {
               href={article.sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+              className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-teal-600 transition-colors"
             >
               <ExternalLink size={14} />
               <span>منبع خبر</span>
@@ -167,8 +167,8 @@ export default async function ArticlePage(props: {
         {/* تگ‌ها */}
         {article.tags?.length > 0 && (
           <ScrollReveal delay={0.3}>
-            <div className="flex items-center gap-2 pt-4 border-t border-gray-100 dark:border-gray-800">
-              <Tag size={16} className="text-red-500" />
+            <div className="flex items-center gap-2 pt-4 border-t border-gray-100 dark:border-gray-700">
+              <Tag size={16} className="text-teal-500" />
               <div className="flex flex-wrap gap-2">
                 {article.tags.map((tag) => (
                   <TagLink key={tag} tag={tag} />
@@ -180,9 +180,9 @@ export default async function ArticlePage(props: {
 
         {/* نشان Breaking */}
         {article.isBreaking && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4 flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-red-600 dark:text-red-400 font-bold text-sm">
+          <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-2xl p-4 flex items-center gap-3">
+            <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
+            <span className="text-teal-600 dark:text-teal-400 font-bold text-sm">
               خبر فوری
             </span>
           </div>
@@ -190,14 +190,14 @@ export default async function ArticlePage(props: {
 
         {/* لینک پخش زنده */}
         {article.isLive && article.liveUrl && (
-          <div className="bg-red-600 dark:bg-red-700 rounded-2xl p-4 flex items-center justify-between">
+          <div className="bg-teal-600 rounded-2xl p-4 flex items-center justify-between">
             <div className="flex items-center gap-3 text-white">
               <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
               <span className="font-bold">پخش زنده این خبر</span>
             </div>
             <a
               href={article.liveUrl}
-              className="px-4 py-2 bg-white text-red-600 dark:bg-gray-900 dark:text-red-400 rounded-xl text-sm font-bold hover:bg-red-50 dark:hover:bg-gray-800 transition-colors"
+              className="px-4 py-2 bg-white dark:bg-gray-800 text-teal-600 dark:text-teal-400 rounded-xl text-sm font-bold hover:bg-teal-50 dark:hover:bg-gray-700 transition-colors"
             >
               مشاهده پخش زنده
             </a>

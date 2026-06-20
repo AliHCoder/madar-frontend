@@ -36,7 +36,7 @@ export default function ScrollReveal({
   }, [delay, direction]);
 
   return (
-    <div ref={ref} className={className}>
+    <div ref={ref} className={`h-full ${className}`}>
       {children}
     </div>
   );

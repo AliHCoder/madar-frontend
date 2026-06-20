@@ -3,7 +3,8 @@
 
 import { useState } from "react";
 import { LiveStream, ArchivedStream } from "@/types/news";
-import { Play, Maximize, Volume2, Pause } from "lucide-react";
+import { Maximize, Volume2, Pause } from "lucide-react";
+import PlayButton from "@/components/ui/PlayButton";
 
 type VideoPlayerProps =
   | { type: "live"; data: LiveStream }
@@ -29,17 +30,13 @@ export default function VideoPlayer({ type, data }: VideoPlayerProps) {
           <div className="absolute inset-0 bg-black/50" />
 
           {/* دکمه پخش */}
-          <button
-            onClick={() => setIsPlaying(true)}
-            className="relative z-10 w-16 h-16 rounded-full bg-red-600 flex items-center justify-center hover:bg-red-700 transition-all hover:scale-110"
-            style={{ boxShadow: "0 0 30px rgba(220,38,38,0.6)" }}
-          >
-            <Play size={28} className="text-white ml-1" />
-          </button>
+          <div className="relative z-10">
+            <PlayButton size={64} onClick={() => setIsPlaying(true)} />
+          </div>
 
           {/* نشان زنده */}
           {type === "live" && (
-            <div className="absolute top-4 left-4 z-10 flex items-center gap-2 px-3 py-1 rounded-full bg-red-600">
+            <div className="absolute top-4 left-4 z-10 flex items-center gap-2 px-3 py-1 rounded-full bg-teal-600">
               <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
               <span className="text-white text-xs font-bold">زنده</span>
             </div>
@@ -56,7 +53,7 @@ export default function VideoPlayer({ type, data }: VideoPlayerProps) {
           />
 
           {/* کنترل‌های سفارشی می‌تونید اضافه کنید */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 dark:from-black/90 to-transparent">
             <div className="flex items-center justify-between text-white">
               <button className="p-1 hover:bg-white/20 rounded">
                 <Pause size={18} />
