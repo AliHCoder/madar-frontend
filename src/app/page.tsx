@@ -3,12 +3,25 @@ export const revalidate = 5;
 import HeroSection from "@/components/news/HeroSection";
 import Link from "next/link";
 import { newsApi, liveApi, archiveApi, heroApi, categoryApi } from "@/lib/api";
-import { TrendingUp, Clock, Radio, Archive, ArrowLeft, ChevronLeft } from "lucide-react";
+import {
+  TrendingUp,
+  Clock,
+  Radio,
+  Archive,
+  ArrowLeft,
+  ChevronLeft,
+} from "lucide-react";
 import HorizontalScrollRow from "@/components/ui/HorizontalScrollRow";
 import NewsCard from "@/components/news/NewsCard";
 import LiveCard from "@/components/live/LiveCard";
 import ArchiveCard from "@/components/archive/ArchiveCard";
-import type { Article, LiveStream, ArchivedStream, HeroItem, Category } from "@/types/news";
+import type {
+  Article,
+  LiveStream,
+  ArchivedStream,
+  HeroItem,
+  Category,
+} from "@/types/news";
 
 export default async function HomePage() {
   const [latestRes, liveRes, archiveRes, heroRes] = await Promise.allSettled([
@@ -18,9 +31,12 @@ export default async function HomePage() {
     heroApi.getSettings(),
   ]);
 
-  const latest = latestRes.status === "fulfilled" ? latestRes.value : { data: [], total: 0 };
-  const safeLiveStreams: LiveStream[] = liveRes.status === "fulfilled" ? liveRes.value : [];
-  const safeArchivedVideos: ArchivedStream[] = archiveRes.status === "fulfilled" ? archiveRes.value : [];
+  const latest =
+    latestRes.status === "fulfilled" ? latestRes.value : { data: [], total: 0 };
+  const safeLiveStreams: LiveStream[] =
+    liveRes.status === "fulfilled" ? liveRes.value : [];
+  const safeArchivedVideos: ArchivedStream[] =
+    archiveRes.status === "fulfilled" ? archiveRes.value : [];
   const heroSettings = heroRes.status === "fulfilled" ? heroRes.value : null;
 
   const allArticles: Article[] = latest.data || [];
@@ -47,16 +63,34 @@ export default async function HomePage() {
         archiveApi.getByCategory(catSlug, 1, 10),
       ]);
 
-      const articles: Article[] = articlesRes.status === "fulfilled" ? (articlesRes.value.data || []) : [];
-      const archives: ArchivedStream[] = archivesRes.status === "fulfilled" ? (archivesRes.value.data || []).filter(Boolean) : [];
+      const articles: Article[] =
+        articlesRes.status === "fulfilled" ? articlesRes.value.data || [] : [];
+      const archives: ArchivedStream[] =
+        archivesRes.status === "fulfilled"
+          ? (archivesRes.value.data || []).filter(Boolean)
+          : [];
       const lives = safeLiveStreams.filter(
-        (l) => l.category?.slug === catSlug || l.categories?.some((c) => c.slug === catSlug),
+        (l) =>
+          l.category?.slug === catSlug ||
+          l.categories?.some((c) => c.slug === catSlug),
       );
 
       const mixed: MixedItem[] = [
-        ...articles.map((a) => ({ type: "article" as const, data: a, date: a.publishedAt })),
-        ...archives.map((a) => ({ type: "archive" as const, data: a, date: a.recordedAt })),
-        ...lives.map((l) => ({ type: "live" as const, data: l, date: l.startTime })),
+        ...articles.map((a) => ({
+          type: "article" as const,
+          data: a,
+          date: a.publishedAt,
+        })),
+        ...archives.map((a) => ({
+          type: "archive" as const,
+          data: a,
+          date: a.recordedAt,
+        })),
+        ...lives.map((l) => ({
+          type: "live" as const,
+          data: l,
+          date: l.startTime,
+        })),
       ]
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .slice(0, 10);
@@ -65,9 +99,10 @@ export default async function HomePage() {
     }),
   );
 
-  const toHeroItem = (
-    item: { type: "article" | "archive" | "live"; data: any },
-  ): HeroItem | null => {
+  const toHeroItem = (item: {
+    type: "article" | "archive" | "live";
+    data: any;
+  }): HeroItem | null => {
     try {
       if (!item?.data) return null;
       const id = item.data._id || item.data.id;
@@ -75,9 +110,10 @@ export default async function HomePage() {
       let link = `/article/${id}`;
       if (item.type === "archive") link = `/archive/${id}`;
       else if (item.type === "live") link = `/live/${id}`;
-      const heroImage = item.data.image && !item.data.image.includes("/assets/images/png/")
-        ? item.data.image
-        : item.data.thumbnail || "";
+      const heroImage =
+        item.data.image && !item.data.image.includes("/assets/images/png/")
+          ? item.data.image
+          : item.data.thumbnail || "";
       return {
         id,
         title: item.data.title || "",
@@ -91,16 +127,17 @@ export default async function HomePage() {
     }
   };
 
-  const heroItems: HeroItem[] = heroSettings?.isActive && heroSettings.items.length > 0
-    ? heroSettings.items.map(toHeroItem).filter(Boolean) as HeroItem[]
-    : allArticles.slice(0, 8).map((a) => ({
-        id: a.id,
-        title: a.title,
-        image: a.image,
-        author: a.author,
-        link: `/article/${a.id}`,
-        type: "article" as const,
-      }));
+  const heroItems: HeroItem[] =
+    heroSettings?.isActive && heroSettings.items.length > 0
+      ? (heroSettings.items.map(toHeroItem).filter(Boolean) as HeroItem[])
+      : allArticles.slice(0, 8).map((a) => ({
+          id: a.id,
+          title: a.title,
+          image: a.image,
+          author: a.author,
+          link: `/article/${a.id}`,
+          type: "article" as const,
+        }));
 
   if (allArticles.length === 0 && heroItems.length === 0) {
     return (
@@ -173,7 +210,7 @@ export default async function HomePage() {
                 مشاهده همه
                 <ChevronLeft size={16} />
               </Link>
-              {liveCount > 0 && (
+              {/* {liveCount > 0 && (
                 <div
                   className="flex items-center gap-2 px-3 py-1.5 rounded-full"
                   style={{
@@ -189,7 +226,7 @@ export default async function HomePage() {
                     {liveCount} زنده
                   </span>
                 </div>
-              )}
+              )} */}
             </div>
 
             <div
@@ -202,7 +239,10 @@ export default async function HomePage() {
 
             <HorizontalScrollRow>
               {liveList.map((stream) => (
-                <div key={stream.id} className="min-w-[260px] md:min-w-[300px] w-[260px] md:w-[300px] flex-shrink-0">
+                <div
+                  key={stream.id}
+                  className="min-w-[260px] md:min-w-[300px] w-[260px] md:w-[300px] flex-shrink-0"
+                >
                   <LiveCard stream={stream} />
                 </div>
               ))}
@@ -220,7 +260,8 @@ export default async function HomePage() {
                     className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                     style={{
                       background: "linear-gradient(135deg, #1099a6, #0d7a85)",
-                      boxShadow: "0 0 20px rgba(16,153,166,0.25), inset 0 1px 0 rgba(255,255,255,0.2)",
+                      boxShadow:
+                        "0 0 20px rgba(16,153,166,0.25), inset 0 1px 0 rgba(255,255,255,0.2)",
                     }}
                   >
                     <span className="text-white text-sm font-black">
@@ -232,7 +273,10 @@ export default async function HomePage() {
                       <h2 className="text-2xl font-black leading-none text-gray-900 dark:text-gray-100 hover:text-teal-500 transition-colors">
                         {category.name}
                       </h2>
-                      <p className="text-[11px] font-semibold tracking-widest mt-0.5 hover:text-teal-400 transition-colors" style={{ color: "#1099a6" }}>
+                      <p
+                        className="text-[11px] font-semibold tracking-widest mt-0.5 hover:text-teal-400 transition-colors"
+                        style={{ color: "#1099a6" }}
+                      >
                         {category.nameEn.toUpperCase()}
                       </p>
                     </Link>
@@ -250,13 +294,17 @@ export default async function HomePage() {
               <div
                 className="w-full h-px mb-6 md:mb-8"
                 style={{
-                  background: "linear-gradient(90deg, #1099a6 0%, rgba(16,153,166,0.3) 50%, transparent 100%)",
+                  background:
+                    "linear-gradient(90deg, #1099a6 0%, rgba(16,153,166,0.3) 50%, transparent 100%)",
                 }}
               />
 
               <HorizontalScrollRow>
                 {items.map((item) => (
-                  <div key={`${item.type}-${item.data.id}`} className="min-w-[260px] md:min-w-[300px] w-[260px] md:w-[300px] flex-shrink-0">
+                  <div
+                    key={`${item.type}-${item.data.id}`}
+                    className="min-w-[260px] md:min-w-[300px] w-[260px] md:w-[300px] flex-shrink-0"
+                  >
                     {item.type === "article" ? (
                       <NewsCard article={item.data as Article} delay={0} />
                     ) : item.type === "archive" ? (
@@ -315,7 +363,10 @@ export default async function HomePage() {
 
             <HorizontalScrollRow>
               {rest.slice(0, MAX_ITEMS).map((article: Article) => (
-                <div key={article.id} className="min-w-[260px] md:min-w-[300px] w-[260px] md:w-[300px] flex-shrink-0">
+                <div
+                  key={article.id}
+                  className="min-w-[260px] md:min-w-[300px] w-[260px] md:w-[300px] flex-shrink-0"
+                >
                   <NewsCard article={article} delay={0} />
                 </div>
               ))}
@@ -368,7 +419,10 @@ export default async function HomePage() {
             <HorizontalScrollRow>
               {safeArchivedVideos.slice(0, 10).map((stream) =>
                 stream ? (
-                  <div key={stream.id} className="min-w-[260px] md:min-w-[300px] w-[260px] md:w-[300px] flex-shrink-0">
+                  <div
+                    key={stream.id}
+                    className="min-w-[260px] md:min-w-[300px] w-[260px] md:w-[300px] flex-shrink-0"
+                  >
                     <ArchiveCard stream={stream} />
                   </div>
                 ) : null,
@@ -411,11 +465,16 @@ export default async function HomePage() {
             />
 
             <HorizontalScrollRow>
-              {allArticles.slice(hero ? 1 : 0, MAX_ITEMS + (hero ? 1 : 0)).map((article: Article) => (
-                <div key={article.id} className="min-w-[260px] md:min-w-[300px] w-[260px] md:w-[300px] flex-shrink-0">
-                  <NewsCard article={article} delay={0} />
-                </div>
-              ))}
+              {allArticles
+                .slice(hero ? 1 : 0, MAX_ITEMS + (hero ? 1 : 0))
+                .map((article: Article) => (
+                  <div
+                    key={article.id}
+                    className="min-w-[260px] md:min-w-[300px] w-[260px] md:w-[300px] flex-shrink-0"
+                  >
+                    <NewsCard article={article} delay={0} />
+                  </div>
+                ))}
             </HorizontalScrollRow>
           </section>
         )}
