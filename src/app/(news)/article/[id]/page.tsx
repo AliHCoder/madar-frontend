@@ -41,9 +41,9 @@ export default async function ArticlePage(props: {
   if (!article) notFound();
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
       {/* ─── محتوای اصلی ─── */}
-      <article className="lg:col-span-2 space-y-8">
+      <article className="lg:col-span-2 space-y-4">
         <ScrollReveal direction="up">
           <div className="space-y-4">
             {/* CategoryBadge */}
@@ -161,7 +161,10 @@ export default async function ArticlePage(props: {
 
         {/* اشتراک‌گذاری و چاپ */}
         <ScrollReveal delay={0.25}>
-          <SharePrintButtons title={article.title} url={`/article/${article.id}`} />
+          <SharePrintButtons
+            title={article.title}
+            url={`/article/${article.id}`}
+          />
         </ScrollReveal>
 
         {/* تگ‌ها */}
@@ -205,12 +208,15 @@ export default async function ArticlePage(props: {
         )}
 
         {/* دیدگاه‌ها */}
-        <CommentSection articleId={article.id} initialComments={initialComments} />
+        <CommentSection
+          articleId={article.id}
+          initialComments={initialComments}
+        />
       </article>
 
       {/* ─── سایدبار ─── */}
-      <aside className="space-y-8">
-        <div className="sticky top-8">
+      <aside className="lg:col-span-1">
+        <div className="lg:sticky lg:top-8">
           <SidebarLatest articles={related} />
         </div>
       </aside>

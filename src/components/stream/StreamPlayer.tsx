@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { MyImage } from "@/components/ui/MyImage";
 import { gsap } from "gsap";
+import Hls from "hls.js";
 import {
   Eye,
   Clock,
@@ -26,11 +27,49 @@ export default function StreamPlayer({
 }) {
   const playerRef = useRef<HTMLDivElement>(null);
   const pulseRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
   const [rating, setRating] = useState(stream.averageRating || 0);
   const [ratingCount, setRatingCount] = useState(stream.ratingCount || 0);
   const [userScore, setUserScore] = useState<number | null>(null);
+
+  const videoSrc = isLive
+    ? (stream as LiveStream).streamUrl
+    : (stream as ArchivedStream).videoUrl;
+
+  const initHls = useCallback(() => {
+    if (!videoRef.current || !videoSrc || stream.embedUrl) return;
+    hlsRef.current?.destroy();
+    hlsRef.current = null;
+    if (videoSrc.includes(".m3u8")) {
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.attachMedia(videoRef.current);
+        hls.on(Hls.Events.MEDIA_ATTACHED, () => hls.loadSource(videoSrc));
+        hlsRef.current = hls;
+      } else if (videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
+        videoRef.current.src = videoSrc;
+      }
+    } else {
+      videoRef.current.src = videoSrc;
+    }
+  }, [videoSrc, stream.embedUrl]);
+
+  useEffect(() => {
+    if (isPlaying && !stream.embedUrl) {
+      const timer = setTimeout(() => initHls(), 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isPlaying, initHls, stream.embedUrl]);
+
+  useEffect(() => {
+    return () => {
+      hlsRef.current?.destroy();
+      hlsRef.current = null;
+    };
+  }, []);
 
   // Determine stream type once
   const liveStream = isLive ? (stream as LiveStream) : null;
@@ -189,12 +228,12 @@ export default function StreamPlayer({
               />
             ) : (
               <video
-                src={isLive ? liveStream?.streamUrl : archivedStream?.videoUrl}
+                ref={videoRef}
                 className="w-full h-full"
                 controls
                 autoPlay
                 playsInline
-                muted // <--- این خط حتما باید اضافه شود تا مرورگر اجازه پخش خودکار بدهد
+                muted
               />
             )}
           </div>
