@@ -44,7 +44,7 @@ export function MyImage({
         alt=""
         width={56}
         height={56}
-        className="absolute bottom-2 right-2 w-11 h-11 opacity-60 pointer-events-none z-10 object-contain"
+        className="absolute bottom-2 right-2 w-11 h-11 opacity-60 pointer-events-none z-30 object-contain"
       />
     </div>
   );

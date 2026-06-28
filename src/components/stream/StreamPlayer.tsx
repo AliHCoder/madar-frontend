@@ -241,7 +241,7 @@ export default function StreamPlayer({
               alt=""
               width={56}
               height={56}
-              className="absolute bottom-12 right-4 w-12 h-12 opacity-70 pointer-events-none z-10 object-contain"
+              className="absolute bottom-16 right-4 w-12 h-12 opacity-70 pointer-events-none z-30 object-contain"
             />
           </div>
         )}
