@@ -218,7 +218,7 @@ export default function StreamPlayer({
         )}
         {/* ─── حالت پخش (وقتی کاربر play زد) ─── */}
         {isPlaying && (
-          <div className="w-full h-full bg-black">
+          <div className="w-full h-full bg-black relative">
             {stream.embedUrl ? (
               <iframe
                 src={stream.embedUrl}
@@ -236,6 +236,13 @@ export default function StreamPlayer({
                 muted
               />
             )}
+            <img
+              src="/images/logo - only - 1000p - FLAT.png"
+              alt=""
+              width={56}
+              height={56}
+              className="absolute bottom-12 right-4 w-12 h-12 opacity-70 pointer-events-none z-10 object-contain"
+            />
           </div>
         )}
       </div>
